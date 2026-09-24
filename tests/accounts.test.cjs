@@ -84,7 +84,7 @@ function harness(t, options = {}) {
   w.FINTRACK_CONFIG = options.unconfigured ? {} : { supabaseUrl: 'https://testing.supabase.co', supabasePublishableKey: 'sb_publishable_test' };
   w.supabase = { createClient: () => client };
   const run=code=>vm.runInContext(code,dom.getInternalVMContext());
-  for (const file of ['preferences.js', 'settings-store.js', 'app-state.js','transaction-tools.js']) run(read(file));
+  for (const file of ['net-worth.js','net-worth-ui.js','preferences.js', 'settings-store.js', 'app-state.js','transaction-tools.js']) run(read(file));
   for (const script of w.document.querySelectorAll('script:not([src])')) run(script.textContent);
   run(read('account-data.js'));
   run(read('accounts.js'));
@@ -421,8 +421,34 @@ test('Delete and Undo persist correctly and undo cannot restore another accountâ
 
 test('sample cards have Demo badges while the real balance does not',async t=>{
   const h=harness(t);await flush();
-  for(const selector of ['#networth .card','#projection .card','#goals .card']){
+  for(const selector of ['#projection .card','#goals .card']){
     for(const card of h.w.document.querySelectorAll(selector))assert.ok(card.querySelector('.demoBadge'));
   }
   assert.equal(h.$('transactionBalance').closest('.card').querySelector('.demoBadge'),null);
+});
+
+test('net worth custom items persist across refresh and account changes',async t=>{
+ const h=harness(t,{user:alice});await flush();h.w.openWizard(1);
+ h.$('nw-assets').querySelector('[data-field="amount"]').value='1000.25';
+ h.w.addNetWorthRow('assets');const asset=h.$('nw-assets').lastElementChild;asset.querySelector('[data-field="name"]').value='<b>Bike</b>';asset.querySelector('[data-field="amount"]').value='200';
+ h.w.addNetWorthRow('liabilities');h.$('nw-liabilities').lastElementChild.querySelector('[data-field="amount"]').value='1500.50';h.w.updateNetWorthPreview();
+ assert.equal(h.$('nwTotal').textContent,'-300.25 RON');await h.w.savePreferences();
+ assert.equal(h.$('netWorthMetric').textContent,'-300.25 RON');assert.equal(h.$('saved-assets').querySelector('b'),null);
+ const fresh=harness(t,{user:alice,db:h.db});await flush();assert.equal(fresh.$('netWorthMetric').textContent,'-300.25 RON');
+ h.$('signOutBtn').click();await flush();await h.submit(alice.email);assert.equal(h.$('netWorthMetric').textContent,'-300.25 RON');
+ const other=harness(t,{user:bob,db:h.db});await flush();assert.equal(other.$('netWorthMetric').textContent,'Set up your net worth');
+});
+test('net worth failed saves and cancelled drafts do not alter saved totals',async t=>{
+ const h=harness(t,{user:alice});await flush();h.w.openWizard(1);h.$('nw-assets').querySelector('[data-field="amount"]').value='100';await h.w.savePreferences();
+ h.w.openWizard(1);h.$('nw-assets').querySelector('[data-field="amount"]').value='999';h.state.failSave=true;await h.w.savePreferences();assert.equal(h.$('netWorthMetric').textContent,'100.00 RON');assert.equal(h.$('nw-assets').querySelector('[data-field="amount"]').value,'999');h.w.closeWizard();h.w.openWizard(1);assert.equal(h.$('nw-assets').querySelector('[data-field="amount"]').value,'100');
+ h.$('nw-assets').querySelector('[data-field="amount"]').value='-1';h.w.nextStep();assert.equal(h.w.document.querySelector('.wizStep.active').dataset.step,'1');
+});
+
+test('navigation views are independent and all element IDs are unique',async t=>{const h=harness(t,{user:alice});await flush();const ids=[...h.w.document.querySelectorAll('[id]')].map(e=>e.id);assert.equal(new Set(ids).size,ids.length);for(const view of h.w.document.querySelectorAll('.view')){assert.equal(view.parentElement.closest('.view'),null,view.id);h.w.show(view.id);assert.equal(h.w.getComputedStyle(view).display,'block');for(let parent=view.parentElement;parent;parent=parent.parentElement)assert.notEqual(h.w.getComputedStyle(parent).display,'none',view.id);}});
+
+test('first-time wizard includes calculator and preserves its currency when base currency changes',async t=>{
+ const h=harness(t,{user:alice});await flush();assert.equal(h.$('overlay').style.display,'flex');h.w.chooseCurrency(h.w.document.querySelector('[data-currency="EUR"]'));h.w.nextStep();assert.equal(h.w.document.querySelector('.wizStep.active').dataset.step,'1');assert.equal(h.$('netWorthCurrency').value,'EUR');h.$('nw-assets').querySelector('[data-field="amount"]').value='50';h.w.nextStep();h.w.nextStep();h.w.nextStep();await h.w.savePreferences();h.w.openWizard();h.w.chooseCurrency(h.w.document.querySelector('[data-currency="USD"]'));assert.equal(h.$('netWorthCurrency').value,'EUR');assert.equal(h.$('nw-assets').querySelector('[data-field="amount"]').value,'50');
+});
+test('net worth validates empty sides, invalid amounts and exact cents',()=>{
+ const nw=require('../net-worth.js');const n={currency:'RON',assets:[{id:'1',name:'Cash',amount:0.1},{id:'2',name:'Savings',amount:0.2}],liabilities:[{id:'3',name:'Debt',amount:0.4}]};assert.deepEqual(nw.totals(n),{assets:0.3,liabilities:0.4,netWorth:-0.1});assert.equal(nw.totals({currency:'EUR',assets:[],liabilities:[]}).netWorth,0);for(const amount of [-1,NaN,Infinity,1e11])assert.throws(()=>nw.validate({...n,assets:[{id:'1',name:'Cash',amount}]}));
 });

@@ -4,16 +4,16 @@ A static personal-finance dashboard with Supabase email/password accounts and pe
 
 ## Current scope
 
-- The dashboard headline is the recorded transaction balance: income minus every recorded outflow (including transfers and investments), in RON. It is not net worth or a bank balance. Amounts display cents.
+- The dashboard headline is saved net worth (assets minus liabilities). Recorded transaction balance remains below it: income minus every recorded outflow (including transfers and investments), in RON. It is not net worth or a bank balance. Amounts display cents.
 - Each transaction has Edit and Delete controls. Edits replace the same record and persist; Cancel leaves the original unchanged. Unfinished edit drafts restore after refresh. Undo last deletion restores deleted entries in reverse order during the current session; the undo history clears on refresh/logout.
-- Static sample charts, net-worth metrics, goals and sample insights have individual Demo badges. No additional database migration is needed for these controls.
+- Static sample charts, goals and sample insights have individual Demo badges. No additional database migration is needed for these controls.
 
 - Sign up, confirm email, sign in, sign out on this browser, and reset a password by email.
 - Save base currency, daily allowance and its currency, baseline monthly burn, and projection horizon.
 - Restore saved settings after refresh or sign-in on another device. Save confirmation appears only after a database response.
 - Preferences are protected by database row-level security. Password handling and session refresh use the official Supabase client.
 - Transactions, scenario sliders, chart selection, current view and unfinished transaction entries autosave to the account. The “All changes saved” indicator confirms the database response. Logout flushes pending saves and stays on the page if a save fails; Retry saving preserves the current edits.
-- New accounts start with an empty transaction list. Net-worth, goal and projection illustrations remain **sample data**. Currency preferences do not convert those figures.
+- New accounts start with an empty transaction list. Net worth starts unset until the user saves assets and liabilities. Goal and projection illustrations remain **sample data**. Currency preferences do not convert those figures.
 - Other devices retrieve saved data on their next load/sign-in. App data uses revision checks: a stale tab/device cannot overwrite a newer saved version. A conflict keeps local edits visible and asks the user to copy unsaved entries before reloading. Preferences still use last successful save wins.
 
 ## Upgrade an existing deployment for persistent transactions
@@ -96,3 +96,13 @@ The tests use jsdom and a simulated Supabase client to verify login errors, sign
 - `vendor/supabase.js`: official `@supabase/supabase-js` **2.117.1** browser bundle, downloaded from jsDelivr; MIT license included alongside it. Vendored so the app does not depend on an unpinned CDN script at runtime.
 
 Official references: [email/password authentication](https://supabase.com/docs/guides/auth/passwords), [row-level security](https://supabase.com/docs/guides/database/postgres/row-level-security), [redirect URLs](https://supabase.com/docs/guides/auth/redirect-urls), [email delivery](https://supabase.com/docs/guides/auth/auth-smtp).
+
+## Net worth calculator
+
+The setup wizard includes a net-worth step with editable categories, + Add asset, + Add liability, removal and live totals. A single snapshot currency applies to all amounts; changing currencies never converts values. Assets use full values and liabilities use outstanding balances. Transactions do not automatically change this snapshot. Existing users can select Update net worth.
+
+Run `supabase/net-worth.sql` once before deploying (already applied for this project). It only adds `user_settings.net_worth`; it does not change transactions or existing preferences. Settings and net worth save together under the existing per-user access rules.
+
+Category reference: https://www.ramseysolutions.com/retirement/net-worth-calculator
+
+Browser QA: `node scripts/preview-test.cjs` serves the actual app against an isolated in-memory account service at http://127.0.0.1:4174. Use `/?new=1` for first-time setup. This test service never connects to Supabase and is not loaded by the deployed app. Automated tests include unique IDs, independent visible navigation views, account separation, refresh/re-login, save failures, custom items and validation.

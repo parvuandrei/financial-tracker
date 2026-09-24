@@ -1,8 +1,9 @@
 (function (root) {
   'use strict';
+  const netWorth = typeof module === 'object' && module.exports ? require('./net-worth.js') : root.FinTrackNetWorth;
   const defaults = Object.freeze({
     currency: 'RON', dailyAllowance: 100, dailyCurrency: 'RON',
-    baselineBurn: 15000, horizon: 12
+    baselineBurn: 15000, horizon: 12, netWorth: null
   });
   function validate(value) {
     const currencies = ['RON', 'EUR', 'USD'];
@@ -15,7 +16,7 @@
     return {
       currency: value.currency, dailyAllowance: value.dailyAllowance,
       dailyCurrency: value.dailyCurrency, baselineBurn: value.baselineBurn,
-      horizon: value.horizon
+      horizon: value.horizon, netWorth: value.netWorth == null ? null : netWorth.validate(value.netWorth)
     };
   }
   const api = Object.freeze({ defaults, validate });

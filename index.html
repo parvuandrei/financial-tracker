@@ -90,7 +90,15 @@ input[type=range]{accent-color:var(--blue);padding:0}
 .summaryRow{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
 .summaryRow:last-child{border-bottom:0}
 @media(max-width:950px){.app{grid-template-columns:1fr}aside{display:none}.metrics,.grid,.row,.scenario{grid-template-columns:1fr}.formGrid,.prefGrid,.choiceGrid,.ruleRow{grid-template-columns:1fr}}
-</style>
+/* Net worth setup keeps navigation visible while long lists scroll. */
+.wizard{max-height:90vh;display:flex;flex-direction:column;overflow:hidden}
+.wizBody{overflow-y:auto;min-height:0}.wizTop,.wizFooter{flex-shrink:0}
+.nwColumns{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.nwRow{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:6px;margin:12px 0}
+.nwRow input{width:100%;min-width:0}.nwRow button{justify-self:start}
+.summaryRow{gap:12px;overflow-wrap:anywhere}
+#netWorthMetric{font-size:clamp(24px,3vw,38px);overflow-wrap:anywhere}
+@media(max-width:600px){.nwColumns{grid-template-columns:1fr}}</style>
 </head>
 <body>
 <noscript>FinTrack requires JavaScript to sign in and load your settings.</noscript>
@@ -146,20 +154,22 @@ input[type=range]{accent-color:var(--blue);padding:0}
       </div>
     </header>
 
-    <div class="demoNotice">Net worth, goals and projection charts contain sample figures. Transactions, scenario inputs and preferences are saved to your account.</div>
+    <div class="demoNotice">Charts and goals contain sample figures. Net worth uses your saved assets and liabilities. Transactions, scenario inputs and preferences are saved to your account.</div>
     <div style="padding:10px 22px"><span id="dataStatus" class="status" role="status" aria-live="polite"></span> <button id="retryData" class="textButton" type="button" hidden>Retry saving</button></div>
     <div class="content">
       <section id="dashboard" class="view active">
         <div class="metrics">
           <div class="card hero">
-            <div class="kicker">Recorded transaction balance</div><div class="metric" id="transactionBalance">0.00 RON</div><div class="sub">All recorded income minus all recorded outflows, including transfers and investments. This is not your bank balance or net worth.</div><div class="sub">Income: <span id="transactionIncome">0.00 RON</span><br>Outflows: <span id="transactionOutflow">0.00 RON</span></div>
+<div class="kicker">Net worth</div><div class="metric" id="netWorthMetric">Set up your net worth</div><div class="sub" id="netWorthBreakdown"></div><button class="cta secondary" onclick="openWizard(1)">Update net worth</button>
           </div>
           <div class="card"><div class="kicker">True monthly burn</div><div class="metric" id="burnMetric">15,000 RON</div><div class="sub">Excludes investments, transfers & one-offs</div></div>
           <div class="card"><div class="kicker">Daily untracked allowance</div><div class="metric" id="dailyMetric">100 RON</div><div class="sub">Automatically deducted daily</div></div>
           <div class="card"><div class="kicker">Projection horizon</div><div class="metric" id="horizonMetric">12 mo</div><div class="sub">Current planning window</div></div>
         </div>
 
-        <div class="grid">
+        
+<div class="card" style="margin-bottom:14px">            <div class="kicker">Recorded transaction balance</div><div class="metric" id="transactionBalance">0.00 RON</div><div class="sub">All recorded income minus all recorded outflows, including transfers and investments. This is not your bank balance or net worth.</div><div class="sub">Income: <span id="transactionIncome">0.00 RON</span><br>Outflows: <span id="transactionOutflow">0.00 RON</span></div></div>
+<div class="grid">
           <div>
             <div class="row">
               <div class="card">
@@ -232,22 +242,7 @@ input[type=range]{accent-color:var(--blue);padding:0}
         </div>
       </section>
 
-      <section id="networth" class="view">
-        <div class="metrics">
-          <div class="card hero"><div class="kicker">Net worth <span class="demoBadge">Demo</span></div><div class="metric">$735,971</div><div class="sub">635,680 EUR</div></div>
-          <div class="card"><div class="kicker">Real estate <span class="demoBadge">Demo</span></div><div class="metric">€397k</div><div class="sub">Existing property</div></div>
-          <div class="card"><div class="kicker">Liquid & receivables <span class="demoBadge">Demo</span></div><div class="metric">~€150k</div><div class="sub">Cash + investments + receivables</div></div>
-          <div class="card"><div class="kicker">Debt <span class="demoBadge">Demo</span></div><div class="metric">€0</div><div class="sub">No active credit</div></div>
-        </div>
-        <div class="card">
-          <h2>Assets <span class="demoBadge">Demo</span></h2>
-          <div class="asset"><div class="icon">🏠</div><div><strong>Primary property</strong><span>Real estate</span></div><div class="amt">€215,000</div></div>
-          <div class="asset"><div class="icon">🏢</div><div><strong>Investment apartment</strong><span>Real estate</span></div><div class="amt">€170,000</div></div>
-          <div class="asset"><div class="icon">💵</div><div><strong>Cash & receivables</strong><span>Cash, payout, inheritance</span></div><div class="amt">~€105,000</div></div>
-          <div class="asset"><div class="icon">📈</div><div><strong>Investments</strong><span>SXR8, stocks, crypto</span></div><div class="amt">~€68,000</div></div>
-          <div class="asset"><div class="icon">🧓</div><div><strong>Pensions / safety</strong><span>Long-term reserves</span></div><div class="amt">~€70,000</div></div>
-        </div>
-      </section>
+      <section id="networth" class="view"><div class="metrics"><div class="card hero"><h2>Net worth</h2><div class="metric" id="netWorthDetail"></div></div><div class="card"><h2>Assets</h2><div class="metric" id="netWorthAssets"></div></div><div class="card"><h2>Liabilities</h2><div class="metric" id="netWorthLiabilities"></div></div></div><div class="card"><button class="cta" onclick="openWizard(1)">Update net worth</button><p>A snapshot of what you own and owe. Transactions do not change these balances automatically.</p><div class="nwColumns"><div><h2>Assets</h2><div id="saved-assets"></div></div><div><h2>Liabilities</h2><div id="saved-liabilities"></div></div></div></div></section>
 
       <section id="projection" class="view">
         <div class="card">
@@ -306,7 +301,7 @@ input[type=range]{accent-color:var(--blue);padding:0}
     <div class="wizTop">
       <h2 id="wizardTitle">Quick setup</h2>
       <div class="stepper">
-        <div class="stepDot active"></div><div class="stepDot"></div><div class="stepDot"></div><div class="stepDot"></div>
+        <div class="stepDot active"></div><div class="stepDot"></div><div class="stepDot"></div><div class="stepDot"></div><div class="stepDot"></div>
       </div>
     </div>
 
@@ -322,7 +317,51 @@ input[type=range]{accent-color:var(--blue);padding:0}
       </div>
 
       <div class="wizStep" data-step="1">
-        <h3>2. Small daily spending rule</h3>
+<h3>2. Calculate your net worth</h3>
+<p>Add the current value of what you own and the balances you owe. Leave unused items at zero or remove them.</p>
+<label for="netWorthCurrency">Currency for all amounts</label>
+<select id="netWorthCurrency">
+<option>RON</option>
+<option>EUR</option>
+<option>USD</option>
+</select>
+<p>Use one currency for every amount. Changing this selection does not convert values. Enter full property and vehicle values as assets; enter outstanding loans as liabilities.</p>
+<div class="nwColumns">
+<div>
+<h4>Assets · what you own</h4>
+<div id="nw-assets">
+</div>
+<button class="cta secondary" type="button" onclick="addNetWorthRow('assets')">+ Add asset</button>
+</div>
+<div>
+<h4>Liabilities · what you owe</h4>
+<div id="nw-liabilities">
+</div>
+<button class="cta secondary" type="button" onclick="addNetWorthRow('liabilities')">+ Add liability</button>
+</div>
+</div>
+<p id="nwError" class="status error" role="status">
+</p>
+<div class="summaryBox" aria-live="polite">
+<div class="summaryRow">
+<span>Total assets</span>
+<strong id="nwAssetsTotal">
+</strong>
+</div>
+<div class="summaryRow">
+<span>Total liabilities</span>
+<strong id="nwDebtsTotal">
+</strong>
+</div>
+<div class="summaryRow">
+<span>Net worth</span>
+<strong id="nwTotal">
+</strong>
+</div>
+</div>
+</div>
+<div class="wizStep" data-step="2">
+        <h3>3. Small daily spending rule</h3>
         <p>If you do not want to log coffee, snacks, small cash purchases, or other minor expenses, set a daily amount to deduct automatically.</p>
         <div class="ruleBox">
           <strong>Daily untracked spending allowance</strong>
@@ -336,8 +375,8 @@ input[type=range]{accent-color:var(--blue);padding:0}
         </div>
       </div>
 
-      <div class="wizStep" data-step="2">
-        <h3>3. Set your planning defaults</h3>
+      <div class="wizStep" data-step="3">
+        <h3>4. Set your planning defaults</h3>
         <p>These are starting assumptions. You can change them later or override them in scenarios.</p>
         <div class="ruleRow">
           <div>
@@ -356,11 +395,11 @@ input[type=range]{accent-color:var(--blue);padding:0}
         </div>
       </div>
 
-      <div class="wizStep" data-step="3">
-        <h3>4. Review</h3>
+      <div class="wizStep" data-step="4">
+        <h3>5. Review</h3>
         <p>Your dashboard will use these preferences as defaults.</p>
         <div class="summaryBox">
-          <div class="summaryRow"><span>Base currency</span><strong id="sumCurrency">RON</strong></div>
+          <div class="summaryRow"><span>Net worth</span><strong id="sumNetWorth"></strong></div><div class="summaryRow"><span>Base currency</span><strong id="sumCurrency">RON</strong></div>
           <div class="summaryRow"><span>Daily untracked allowance</span><strong id="sumDaily">100 RON/day</strong></div>
           <div class="summaryRow"><span>Baseline monthly burn</span><strong id="sumBurn">15,000 RON</strong></div>
           <div class="summaryRow"><span>Projection horizon</span><strong id="sumHorizon">12 months</strong></div>
@@ -381,8 +420,10 @@ input[type=range]{accent-color:var(--blue);padding:0}
 
 <script src="vendor/supabase.js?v=dff1e545f4f3"></script>
 <script src="config.js?v=eda093a762c5"></script>
-<script src="preferences.js?v=4e645b8c3f26"></script>
-<script src="settings-store.js?v=9aec5665ffb2"></script>
+<script src="net-worth.js?v=e677194d3f81"></script>
+<script src="net-worth-ui.js?v=6e057385aad1"></script>
+<script src="preferences.js?v=e79be5937754"></script>
+<script src="settings-store.js?v=7c4da30b17d8"></script>
 <script src="app-state.js?v=da65f2cf5b87"></script>
 <script src="transaction-tools.js?v=e8486f77fdbd"></script>
 <script>
@@ -447,16 +488,16 @@ function calc(){
 }
 
 /* Wizard */
-function openWizard(){
+function openWizard(startAt=0){
   if(!window.FinTrackAccount?.isReady() || savingPreferences) return;
   wizardOpener=document.activeElement;
   fillWizard(savedPreferences);
   document.getElementById('wizardStatus').textContent='';
-  currentStep=0;
+  currentStep=startAt;
   document.getElementById('overlay').style.display='flex';
   document.getElementById('app').inert=true;
   updateWizard();
-  document.querySelector('[data-currency="'+selectedCurrency+'"]').focus();
+  document.querySelector('.wizStep.active button,.wizStep.active select,.wizStep.active input')?.focus();
 }
 function closeWizard(){
   if(savingPreferences) return;
@@ -465,6 +506,7 @@ function closeWizard(){
   wizardOpener?.focus();
 }
 function fillWizard(p){
+  fillNetWorthWizard(p.netWorth,p.currency);
   selectedCurrency=p.currency;
   document.querySelectorAll('[data-currency]').forEach(x=>{
     x.classList.toggle('active',x.dataset.currency===p.currency);
@@ -481,17 +523,22 @@ function chooseCurrency(el){
   document.querySelectorAll('[data-currency]').forEach(x=>x.setAttribute('aria-pressed',String(x===el)));
   selectedCurrency=el.dataset.currency;
   document.getElementById('dailyCurrency').value=selectedCurrency;
+  const snapshot=readNetWorthWizard();
+  if(!savedPreferences.netWorth && [...snapshot.assets,...snapshot.liabilities].every(row=>row.amount===0)){
+    document.getElementById('netWorthCurrency').value=selectedCurrency;updateNetWorthPreview();
+  }
 }
 function nextStep(){
   if(savingPreferences) return;
   for(const input of document.querySelectorAll('.wizStep.active input')){
     if(input.value.trim()==='' || !input.reportValidity()){
-      document.getElementById('wizardStatus').textContent='Enter a valid non-negative amount.';
+      document.getElementById('wizardStatus').textContent='Give each item a name and enter valid non-negative amounts.';
       input.focus();return;
     }
   }
+  if(currentStep===1){try{readNetWorthWizard();}catch(error){document.getElementById('wizardStatus').textContent=error.message;return;}}
   document.getElementById('wizardStatus').textContent='';
-  if(currentStep<3){currentStep++;updateWizard()}
+  if(currentStep<4){currentStep++;updateWizard()}
   else{savePreferences()}
 }
 function backStep(){
@@ -499,17 +546,20 @@ function backStep(){
   if(currentStep>0){currentStep--;updateWizard()}
 }
 function updateWizard(){
+  document.querySelector('.wizBody').scrollTop=0;
   document.querySelectorAll('.wizStep').forEach((s,i)=>s.classList.toggle('active',i===currentStep));
   document.querySelectorAll('.stepDot').forEach((d,i)=>d.classList.toggle('active',i<=currentStep));
   document.getElementById('backBtn').style.visibility=currentStep===0?'hidden':'visible';
-  document.getElementById('nextBtn').textContent=currentStep===3?'Save preferences':'Next';
-  if(currentStep===3) updateSummary();
+  document.getElementById('nextBtn').textContent=currentStep===4?'Save preferences':'Next';
+  if(currentStep===4) updateSummary();
 }
 function updateSummary(){
   const daily=Number(document.getElementById('dailyAllowance').value||0);
   const dailyCur=document.getElementById('dailyCurrency').value;
   const burn=Number(document.getElementById('baselineBurn').value||0);
   const horizon=document.getElementById('projectionHorizon').value;
+  const nw=readNetWorthWizard();
+  document.getElementById('sumNetWorth').textContent=netWorthMoney(FinTrackNetWorth.totals(nw).netWorth,nw.currency);
   document.getElementById('sumCurrency').textContent=selectedCurrency;
   document.getElementById('sumDaily').textContent=`${daily.toLocaleString('en-US')} ${dailyCur}/day`;
   document.getElementById('sumBurn').textContent=`${burn.toLocaleString('en-US')} ${selectedCurrency}`;
@@ -517,6 +567,7 @@ function updateSummary(){
 }
 function applyPreferences(value){
   savedPreferences=FinTrackPreferences.validate(value);
+  renderSavedNetWorth(savedPreferences.netWorth);
   const {dailyAllowance:daily,dailyCurrency:dailyCur,baselineBurn:burn,horizon,currency}=savedPreferences;
   document.getElementById('dailyMetric').textContent=`${daily.toLocaleString('en-US')} ${dailyCur}`;
   document.getElementById('horizonMetric').textContent=`${horizon} mo`;
@@ -536,7 +587,7 @@ async function savePreferences(){
       currency:selectedCurrency,dailyAllowance:document.getElementById('dailyAllowance').valueAsNumber,
       dailyCurrency:document.getElementById('dailyCurrency').value,
       baselineBurn:document.getElementById('baselineBurn').valueAsNumber,
-      horizon:Number(document.getElementById('projectionHorizon').value)
+      horizon:Number(document.getElementById('projectionHorizon').value),netWorth:readNetWorthWizard()
     });
     savingPreferences=true;
     document.querySelectorAll('#overlay button,#overlay input,#overlay select').forEach(x=>x.disabled=true);
