@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>FinTrack</title>
 <meta name="referrer" content="no-referrer">
-<link rel="stylesheet" href="accounts.css">
+<link rel="stylesheet" href="accounts.css?v=dbab427edfcd">
 <style>
 :root{
   --bg:#f4f6f8; --card:#fff; --text:#111827; --muted:#6b7280; --line:#e5e7eb;
@@ -226,7 +226,7 @@ input[type=range]{accent-color:var(--blue);padding:0}
             <select id="type"><option>Expense</option><option>Income</option><option>Investment</option><option>Transfer</option><option>One-off</option></select>
             <select id="cat"><option>Food</option><option>Home</option><option>Child</option><option>Salary</option><option>Investment</option><option>Vacation</option></select>
           </div>
-          <button class="cta" onclick="addCustom()">Add</button>
+          <button class="cta" id="addTransactionBtn" onclick="addCustom()">Add</button>
           <p id="transactionStatus" class="status error" role="status"></p>
         </div>
         <div class="card" style="margin-top:14px">
@@ -382,11 +382,11 @@ input[type=range]{accent-color:var(--blue);padding:0}
   </div>
 </div>
 
-<script src="vendor/supabase.js"></script>
-<script src="config.js"></script>
-<script src="preferences.js"></script>
-<script src="settings-store.js"></script>
-<script src="app-state.js"></script>
+<script src="vendor/supabase.js?v=dff1e545f4f3"></script>
+<script src="config.js?v=eda093a762c5"></script>
+<script src="preferences.js?v=4e645b8c3f26"></script>
+<script src="settings-store.js?v=9aec5665ffb2"></script>
+<script src="app-state.js?v=4a7482745be8"></script>
 <script>
 const tx=[];
 let currentChart='base';
@@ -429,6 +429,7 @@ function addCustom(){
   document.getElementById('transactionStatus').textContent='';
   render();
   window.FinTrackData?.changed();
+  void window.FinTrackData?.flush().catch(()=>{});
 }
 function chart(btn,mode){
   btn.parentElement.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));btn.classList.add('active');
@@ -603,7 +604,7 @@ document.getElementById('overlay').addEventListener('keydown',event=>{
   else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}
 });
 </script>
-<script src="account-data.js"></script>
-<script src="accounts.js"></script>
+<script src="account-data.js?v=9f5f8339dfbc"></script>
+<script src="accounts.js?v=157f0d231258"></script>
 </body>
 </html>

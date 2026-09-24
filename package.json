@@ -2,7 +2,8 @@
   "name": "financial-tracker",
   "private": true,
   "scripts": {
-    "test": "node --test tests/*.test.cjs",
+    "test": "node scripts/version-assets.cjs --check && node --test tests/*.test.cjs",
+    "version-assets": "node scripts/version-assets.cjs",
     "start": "node scripts/serve.cjs"
   },
   "devDependencies": { "jsdom": "26.1.0" }

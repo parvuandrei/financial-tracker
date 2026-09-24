@@ -353,3 +353,16 @@ test('an old user save cannot change the next user’s visible data or save stat
   assert.equal(h.$('accountEmail').textContent,bob.email);
   assert.equal(h.w.FinTrackData.isDirty(),false);
 });
+
+test('Add starts a save immediately and shows progress until the server confirms', async t => {
+  const h=harness(t,{user:alice,db:new Map([[alice.id,row(alice)]])});await flush();
+  let release;h.state.dataSaveGate=new Promise(resolve=>{release=resolve;});
+  h.$('name').value='Visible save';h.$('amount').value='10';h.w.addCustom();await flush();
+  assert.equal(h.$('addTransactionBtn').textContent,'Saving…');
+  assert.equal(h.$('addTransactionBtn').disabled,true);
+  assert.equal(h.$('transactionStatus').textContent,'Saving…');
+  const pending=h.w.FinTrackData.flush();release();await pending;
+  assert.equal(h.$('addTransactionBtn').disabled,false);
+  assert.equal(h.$('transactionStatus').textContent,'All changes saved');
+  assert.equal(h.appDb.get(alice.id).state.transactions[0].name,'Visible save');
+});

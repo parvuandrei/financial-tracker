@@ -6,6 +6,14 @@
     document.getElementById('dataStatus').textContent = text;
     document.getElementById('dataStatus').className = `status ${failed ? 'error' : ''}`;
     document.getElementById('retryData').hidden = !failed;
+    const transactionStatus = document.getElementById('transactionStatus');
+    transactionStatus.textContent = text;
+    transactionStatus.className = `status ${failed ? 'error' : ''}`;
+    const button = document.getElementById('addTransactionBtn');
+    const saving = text === 'Saving…';
+    button.disabled = saving;
+    button.textContent = saving ? 'Saving…' : 'Add';
+    button.setAttribute('aria-busy', String(saving));
   };
   function clear() {
     ++generation; owner = null; revision = 0; changes = 0; saved = 0; pending = null;

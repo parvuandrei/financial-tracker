@@ -60,6 +60,10 @@ Open <http://127.0.0.1:4173/>. Use HTTP on localhost or HTTPS when deployed, rat
 
 ## Automated checks
 
+After editing browser assets, run `node scripts/version-assets.cjs` before testing and publishing. The HTML references content-versioned JavaScript/CSS so browsers fetch changed files instead of mixing old and new app code. `pnpm test` checks these versions. An already-open tab still needs a reload after deployment.
+
+Adding a transaction starts saving immediately; the Add button and transaction form show “Saving…” until the server responds. A failure keeps the entry visible with Retry saving and does not claim success.
+
 ```sh
 pnpm install --frozen-lockfile
 pnpm test
