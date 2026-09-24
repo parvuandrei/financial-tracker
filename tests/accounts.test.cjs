@@ -30,6 +30,7 @@ function harness(t, options = {}) {
         emit('SIGNED_IN', credentials.email === bob.email ? bob : alice); return { error: null };
       },
       async signUp(input) { state.calls.push(['signup', input]); return { data: { session: null }, error: null }; },
+      async signInWithOAuth(input) { state.calls.push(['oauth', input]); return { error: state.oauthError || null }; },
       async resetPasswordForEmail(email, config) { state.calls.push(['reset', email, config]); return { error: null }; },
       async updateUser(input) { state.calls.push(['update', input]); emit('USER_UPDATED', state.user); return { error: null }; },
       async signOut() { emit('SIGNED_OUT', null); return { error: null }; }
@@ -199,4 +200,42 @@ test('transaction input is rendered as text, preventing script injection into au
   h.$('name').value = '<img src=x onerror=alert(1)>'; h.$('amount').value = '1'; h.w.addCustom();
   assert.equal(h.$('all').querySelector('img'), null);
   assert.match(h.$('all').textContent, /<img/);
+});
+
+test('Google is offered for login/signup and redirects back to the app subpath', async t => {
+  const h = harness(t); await flush();
+  assert.equal(h.$('googleAccess').hidden, false);
+  h.$('authToggle').click();
+  assert.equal(h.$('googleAccess').hidden, false);
+  h.$('googleSignIn').click(); h.$('googleSignIn').click(); await flush();
+  assert.equal(h.state.calls.length, 1);
+  assert.equal(h.state.calls[0][1].provider, 'google');
+  assert.equal(h.state.calls[0][1].options.redirectTo, 'https://example.test/financial-tracker/');
+  assert.equal(h.$('app').hidden, true);
+});
+
+test('Google failure allows retry and does not interfere with email login', async t => {
+  const h = harness(t); await flush();
+  h.state.oauthError = new Error('provider disabled');
+  h.$('googleSignIn').click(); await flush();
+  assert.match(h.$('authStatus').textContent, /Google sign-in is unavailable/);
+  assert.equal(h.$('googleSignIn').disabled, false);
+  await h.submit(alice.email);
+  assert.equal(h.$('app').hidden, false);
+});
+
+test('cancelled OAuth shows a safe message and clears callback errors from the URL', async t => {
+  const h = harness(t, { url: 'https://example.test/financial-tracker/#error=access_denied&error_description=untrusted' }); await flush();
+  assert.match(h.$('authStatus').textContent, /cancelled/);
+  assert.doesNotMatch(h.$('authStatus').textContent, /untrusted/);
+  assert.equal(h.w.location.hash, '');
+  assert.equal(h.$('app').hidden, true);
+});
+
+test('Google session restores the same user preferences; recovery hides Google', async t => {
+  const h = harness(t, { db: new Map([[alice.id, row(alice, 'USD')]]) }); await flush();
+  h.emit('SIGNED_IN', { ...alice, app_metadata: { provider: 'google' } }); await flush();
+  assert.equal(h.$('prefCurrency').textContent, 'USD');
+  h.emit('PASSWORD_RECOVERY', alice);
+  assert.equal(h.$('googleAccess').hidden, true);
 });

@@ -28,6 +28,18 @@ A static personal-finance dashboard with Supabase email/password accounts and pe
 5. Copy the Project URL and **publishable** key (`sb_publishable_…`) from the project's Connect panel into [`config.js`](config.js). These values are intended for browser use. Never put a secret key, service-role key, database password, or personal access token in the frontend. This implementation expects a hosted `https://….supabase.co` URL and a publishable key.
 6. Run the verification below, then publish the branch. Until configuration is supplied, the app shows an account setup placeholder and keeps the dashboard hidden.
 
+## Enable Continue with Google
+
+1. Open [Google Auth Platform](https://console.cloud.google.com/auth/overview), select/create a project, and complete its app branding/audience setup for FinTrack. If the app is in Testing, add the intended Google accounts as test users.
+2. Under **Clients**, create an OAuth client of type **Web application**.
+3. Set the authorized JavaScript origin to `https://parvuandrei.github.io` (no path).
+4. Set the authorized redirect URI to `https://xpwdghfdhyrirkybeakw.supabase.co/auth/v1/callback`.
+5. In Supabase **Authentication → Sign In / Providers → Google**, enable Google, paste the client ID and client secret, and Save. Keep the secret only in Supabase; never add it to `config.js` or GitHub.
+6. Keep `https://parvuandrei.github.io/financial-tracker/` in Supabase's allowed redirect URLs. Google redirects to Supabase; Supabase then redirects to this app.
+7. Publish the updated frontend, choose **Continue with Google**, complete sign-in, save preferences, then sign out and back in to verify persistence. The same button handles new and returning users. No Gmail mailbox access is requested.
+
+Google setup is external to this repository. Automated tests simulate provider responses and do not verify Google Cloud configuration or a real OAuth round trip. See the [official Supabase Google guide](https://supabase.com/docs/guides/auth/social-login/auth-google).
+
 ## Run locally
 
 Node.js is needed only for the preview server and tests:

@@ -4,6 +4,8 @@
   let client, store, user = null, ready = false, version = 0, mode = 'login', busy = false;
   let recovering = new URLSearchParams(location.search).get('recovery') === '1';
   const form = $('authForm');
+  let callbackError = [location.search.slice(1), location.hash.slice(1)]
+    .some(part => new URLSearchParams(part).has('error'));
   const status = (message, kind = '') => {
     $('authStatus').textContent = message;
     $('authStatus').className = `status ${kind}`;
@@ -13,6 +15,7 @@
     form.querySelectorAll('input,button').forEach(el => el.disabled = value);
     $('authToggle').disabled = value;
     $('authForgot').disabled = value;
+    $('googleSignIn').disabled = value;
   }
   function showMode(next) {
     mode = next;
@@ -36,6 +39,7 @@
     $('authToggle').textContent = mode === 'login' ? 'Create an account' : 'Back to sign in';
     $('authForgot').hidden = mode !== 'login';
     $('authLinks').hidden = recovery;
+    $('googleAccess').hidden = reset || recovery;
     $('authSignOut').hidden = !recovery;
     $('retrySettings').hidden = true;
     form.hidden = false;
@@ -46,6 +50,7 @@
     $('app').hidden = true;
     $('authScreen').hidden = false;
     $('accountEmail').textContent = '';
+    $('googleAccess').hidden = true;
     resetDashboard();
   }
   async function loadSettings(ticket) {
@@ -86,6 +91,11 @@
     lockDashboard();
     if (!user) {
       showMode('login');
+      if (callbackError) {
+        callbackError = false;
+        status('Sign-in was cancelled or could not be completed. Please try again.', 'error');
+        history.replaceState(null, '', location.pathname);
+      }
       return;
     }
     if (recovering) {
@@ -106,6 +116,25 @@
     if (error?.code === 'same_password') return 'Choose a password different from your current one.';
     return 'We couldn’t complete that request. Check your connection and try again.';
   }
+  $('googleSignIn').addEventListener('click', async () => {
+    if (busy || !client || user || (mode !== 'login' && mode !== 'signup')) return;
+    setBusy(true);
+    status('Opening Google sign-in…');
+    try {
+      const { error } = await client.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: redirectUrl(), queryParams: { prompt: 'select_account' } }
+      });
+      if (error) throw error;
+    } catch (error) {
+      status('Google sign-in is unavailable right now. Try again or sign in with email.', 'error');
+      setBusy(false);
+    }
+  });
+  // A browser Back navigation may restore the page with its buttons disabled.
+  window.addEventListener('pageshow', event => {
+    if (event.persisted && !user) { setBusy(false); status(''); }
+  });
   form.addEventListener('submit', async event => {
     event.preventDefault();
     if (busy || !client || !form.reportValidity()) return;
