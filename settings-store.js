@@ -10,7 +10,7 @@
       return preferences.validate({
         currency: row.currency, dailyAllowance: row.daily_allowance,
         dailyCurrency: row.daily_currency, baselineBurn: row.baseline_burn,
-        horizon: row.horizon, netWorth: row.net_worth
+        horizon: row.horizon
       });
     }
     return {
@@ -27,7 +27,7 @@
         const p = preferences.validate(value);
         const { data, error } = await client.from('user_settings').upsert({
           user_id: userId, currency: p.currency, daily_allowance: p.dailyAllowance,
-          daily_currency: p.dailyCurrency, baseline_burn: p.baselineBurn, horizon: p.horizon, net_worth: p.netWorth
+          daily_currency: p.dailyCurrency, baseline_burn: p.baselineBurn, horizon: p.horizon
         }, { onConflict: 'user_id' }).select('*').single();
         if (error) throw error;
         if (!data || data.user_id !== userId) throw new Error('Settings were not confirmed saved.');
