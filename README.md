@@ -96,10 +96,3 @@ The tests use jsdom and a simulated Supabase client to verify login errors, sign
 - `vendor/supabase.js`: official `@supabase/supabase-js` **2.117.1** browser bundle, downloaded from jsDelivr; MIT license included alongside it. Vendored so the app does not depend on an unpinned CDN script at runtime.
 
 Official references: [email/password authentication](https://supabase.com/docs/guides/auth/passwords), [row-level security](https://supabase.com/docs/guides/database/postgres/row-level-security), [redirect URLs](https://supabase.com/docs/guides/auth/redirect-urls), [email delivery](https://supabase.com/docs/guides/auth/auth-smtp).
-
-### Net worth setup
-Before publishing this update, run `supabase/net-worth.sql` in Supabase SQL Editor. It adds a nullable net_worth column to the existing per-user settings row and retains its access rules. Existing data is preserved.
-
-The five-step setup includes editable asset and liability categories, + controls and live totals. Net worth and preferences save together. Dashboard and Net worth views use the saved snapshot; transactions do not automatically alter asset balances. All amounts in a snapshot share its chosen currency, with no automatic conversion. Existing users can select Update net worth. Custom items are limited to 100 per side.
-
-Category inspiration: https://www.ramseysolutions.com/retirement/net-worth-calculator
