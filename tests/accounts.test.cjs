@@ -17,7 +17,7 @@ const row = (user, currency = 'RON') => ({ user_id: user.id, currency, daily_all
 function harness(t, options = {}) {
   const dom = new JSDOM(read('index.html'), { url: options.url || 'https://example.test/financial-tracker/', runScripts: 'outside-only', pretendToBeVisual: true });
   t.after(() => dom.window.close());
-  const w = dom.window, db = options.db || new Map();
+  const w = dom.window, db = options.db || new Map(), appDb = options.appDb || new Map();
   const state = { user: options.user || null, callback: null, failLoad: false, failSave: false, loadGate: null, saveGate: null, calls: [] };
   const emit = (event, user) => { state.user = user; state.callback(event, user ? { user } : null); };
   const client = {
@@ -36,6 +36,29 @@ function harness(t, options = {}) {
       async signOut() { emit('SIGNED_OUT', null); return { error: null }; }
     },
     from(table) {
+      if(table === 'user_app_state') {
+        let owner, revision, payload, inserting;
+        const chain = {
+          select(){return chain;},
+          eq(key,value){if(key==='user_id')owner=value;else revision=value;return chain;},
+          insert(value){payload=value;inserting=true;return chain;},
+          update(value){payload=value;return chain;},
+          async maybeSingle(){
+            if(state.failDataLoad)return {error:new Error('offline')};
+            return {data:appDb.get(owner)||null,error:null};
+          },
+          async single(){
+            state.calls.push(['dataSave',payload]);
+            if(state.dataSaveGate)await state.dataSaveGate;
+            if(state.failDataSave)return {error:new Error('offline')};
+            const existing=appDb.get(payload.user_id);
+            if((inserting&&existing)||(!inserting&&existing?.revision!==revision))return {error:{code:inserting?'23505':'PGRST116'}};
+            appDb.set(payload.user_id,JSON.parse(JSON.stringify(payload)));
+            return {data:payload,error:null};
+          }
+        };
+        return chain;
+      }
       assert.equal(table, 'user_settings');
       let owner, payload;
       const chain = {
@@ -59,15 +82,16 @@ function harness(t, options = {}) {
   };
   w.FINTRACK_CONFIG = options.unconfigured ? {} : { supabaseUrl: 'https://testing.supabase.co', supabasePublishableKey: 'sb_publishable_test' };
   w.supabase = { createClient: () => client };
-  for (const file of ['preferences.js', 'settings-store.js']) w.eval(read(file));
+  for (const file of ['preferences.js', 'settings-store.js', 'app-state.js']) w.eval(read(file));
   for (const script of w.document.querySelectorAll('script:not([src])')) w.eval(script.textContent);
+  w.eval(read('account-data.js'));
   w.eval(read('accounts.js'));
   const $ = id => w.document.getElementById(id);
   async function submit(email, password = 'test-password-123') {
     $('authEmail').value = email; $('authPassword').value = password;
     $('authForm').dispatchEvent(new w.Event('submit', { bubbles: true, cancelable: true })); await flush();
   }
-  return { w, $, state, emit, db, submit };
+  return { w, $, state, emit, db, appDb, submit };
 }
 
 test('preferences reject invalid currency, negative/non-finite amounts and unsupported horizon', () => {
@@ -144,7 +168,7 @@ test('failed load keeps dashboard locked; retry restores saved preferences', asy
   assert.equal(h.$('prefDaily').textContent, '75 EUR/day');
 });
 
-test('sign-out clears account state and temporary transactions before another user signs in', async t => {
+test('sign-out clears visible account state before another user signs in', async t => {
   const h = harness(t, { user: alice, db: new Map([[alice.id, row(alice, 'USD')]]) }); await flush();
   h.$('name').value = 'Private test purchase'; h.$('amount').value = '20'; h.w.addCustom();
   h.$('signOutBtn').click(); await flush();
@@ -238,4 +262,94 @@ test('Google session restores the same user preferences; recovery hides Google',
   assert.equal(h.$('prefCurrency').textContent, 'USD');
   h.emit('PASSWORD_RECOVERY', alice);
   assert.equal(h.$('googleAccess').hidden, true);
+});
+
+test('logout flushes new transactions and restores them after login and on another device', async t => {
+  const db=new Map([[alice.id,row(alice)]]),appDb=new Map();
+  const h=harness(t,{user:alice,db,appDb});await flush();
+  h.$('name').value='Weekly groceries';h.$('amount').value='123.45';h.w.addCustom();
+  h.$('signOutBtn').click();await flush();
+  assert.equal(appDb.get(alice.id).state.transactions.length,1);
+  assert.equal(appDb.get(alice.id).state.transactions[0].amt,-123.45);
+  await h.submit(alice.email);
+  assert.match(h.$('all').textContent,/Weekly groceries/);
+  const device=harness(t,{user:alice,db,appDb});await flush();
+  assert.match(device.$('all').textContent,/Weekly groceries/);
+});
+
+test('scenario controls, chart, view and unfinished entry survive a fresh page', async t => {
+  const db=new Map([[alice.id,row(alice)]]),appDb=new Map();
+  const h=harness(t,{user:alice,db,appDb});await flush();
+  h.$('inc').value='40000';h.$('exp').value='18000';h.$('inv').value='2000';h.$('evt').value='5000';
+  h.w.chart(h.w.document.querySelectorAll('.tab')[1],'stress');h.w.show('scenarios');
+  h.$('name').value='Draft entry';h.$('amount').value='20';h.$('type').value='Income';h.$('cat').value='Salary';
+  h.w.FinTrackData.changed();await h.w.FinTrackData.flush();
+  const fresh=harness(t,{user:alice,db,appDb});await flush();
+  for(const [id,value] of Object.entries({inc:'40000',exp:'18000',inv:'2000',evt:'5000',name:'Draft entry',amount:'20',type:'Income',cat:'Salary'}))assert.equal(fresh.$(id).value,value);
+  assert.equal(fresh.$('scenarios').classList.contains('active'),true);
+  assert.equal(fresh.w.document.querySelectorAll('.tab')[1].classList.contains('active'),true);
+  assert.equal(fresh.w.FinTrackData.isDirty(),false);
+});
+
+test('failed save prevents logout, keeps the transaction, and supports retry', async t => {
+  const h=harness(t,{user:alice,db:new Map([[alice.id,row(alice)]])});await flush();
+  h.state.failDataSave=true;
+  h.$('name').value='Keep this entry';h.$('amount').value='50';h.w.addCustom();
+  h.$('signOutBtn').click();await flush();
+  assert.equal(h.$('app').hidden,false);
+  assert.equal(h.w.FinTrackData.isDirty(),true);
+  assert.match(h.$('all').textContent,/Keep this entry/);
+  assert.equal(h.$('retryData').hidden,false);
+  h.state.failDataSave=false;h.$('retryData').click();await flush();
+  assert.equal(h.w.FinTrackData.isDirty(),false);
+  h.$('signOutBtn').click();await flush();assert.equal(h.$('app').hidden,true);
+});
+
+test('edits during a pending save are serialized and the latest state is saved', async t => {
+  const h=harness(t,{user:alice,db:new Map([[alice.id,row(alice)]])});await flush();
+  let release;h.state.dataSaveGate=new Promise(resolve=>{release=resolve;});
+  h.$('name').value='First';h.$('amount').value='10';h.w.addCustom();
+  const pending=h.w.FinTrackData.flush();await flush();
+  h.$('name').value='Second';h.$('amount').value='20';h.w.addCustom();
+  release();await pending;
+  assert.equal(h.appDb.get(alice.id).state.transactions.length,2);
+  assert.equal(h.appDb.get(alice.id).revision,2);
+  assert.equal(h.w.FinTrackData.isDirty(),false);
+});
+
+test('concurrent devices cannot overwrite each other’s transactions', async t => {
+  const db=new Map([[alice.id,row(alice)]]),appDb=new Map();
+  const a=harness(t,{user:alice,db,appDb}),b=harness(t,{user:alice,db,appDb});await flush();
+  a.$('name').value='Device A';a.$('amount').value='1';a.w.addCustom();await a.w.FinTrackData.flush();
+  b.$('name').value='Device B';b.$('amount').value='2';b.w.addCustom();
+  await assert.rejects(b.w.FinTrackData.flush(),/Another tab or device/);
+  assert.equal(appDb.get(alice.id).state.transactions[0].name,'Device A');
+  assert.match(b.$('all').textContent,/Device B/);
+  assert.equal(b.w.FinTrackData.isDirty(),true);
+});
+
+test('failed data load does not show defaults that could overwrite saved data', async t => {
+  const h=harness(t);await flush();h.state.failDataLoad=true;h.emit('SIGNED_IN',alice);await flush();
+  assert.equal(h.$('app').hidden,true);
+  assert.equal(h.$('retrySettings').hidden,false);
+  h.state.failDataLoad=false;h.$('retrySettings').click();await flush();
+  assert.equal(h.$('app').hidden,false);
+});
+
+test('invalid transactions are rejected without saving an empty or zero entry', async t => {
+  const h=harness(t,{user:alice,db:new Map([[alice.id,row(alice)]])});await flush();
+  h.$('name').value='';h.$('amount').value='20';h.w.addCustom();
+  h.$('name').value='Test';h.$('amount').value='0';h.w.addCustom();
+  assert.equal(h.w.captureAccountState().transactions.length,0);
+  assert.match(h.$('transactionStatus').textContent,/non-zero/);
+});
+
+test('an old user save cannot change the next user’s visible data or save status', async t => {
+  const h=harness(t,{user:alice,db:new Map([[alice.id,row(alice)],[bob.id,row(bob)]])});await flush();
+  let release;h.state.dataSaveGate=new Promise(resolve=>{release=resolve;});
+  h.$('name').value='Alice only';h.$('amount').value='5';h.w.addCustom();const pending=h.w.FinTrackData.flush();await flush();
+  h.emit('SIGNED_OUT',null);h.emit('SIGNED_IN',bob);await flush();release();await pending;
+  assert.doesNotMatch(h.$('all').textContent,/Alice only/);
+  assert.equal(h.$('accountEmail').textContent,bob.email);
+  assert.equal(h.w.FinTrackData.isDirty(),false);
 });

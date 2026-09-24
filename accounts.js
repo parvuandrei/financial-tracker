@@ -47,6 +47,7 @@
   }
   function lockDashboard() {
     ready = false;
+    FinTrackData.clear();
     $('app').hidden = true;
     $('authScreen').hidden = false;
     $('accountEmail').textContent = '';
@@ -60,11 +61,11 @@
     $('authLinks').hidden = true;
     $('retrySettings').hidden = true;
     $('authSignOut').hidden = false;
-    $('authTitle').textContent = 'Loading your preferences';
-    $('authDescription').textContent = 'Getting your saved settings ready.';
+    $('authTitle').textContent = 'Loading your account';
+    $('authDescription').textContent = 'Getting your transactions and saved settings ready.';
     status('Loading…');
     try {
-      const preferences = await store.load(owner.id);
+      const [preferences] = await Promise.all([store.load(owner.id), FinTrackData.load(owner.id)]);
       if (ticket !== version || recovering) return;
       applyPreferences(preferences || FinTrackPreferences.defaults);
       ready = true;
@@ -76,7 +77,7 @@
       if (!preferences) openWizard();
     } catch (error) {
       if (ticket !== version) return;
-      $('authTitle').textContent = 'Couldn’t load your settings';
+      $('authTitle').textContent = 'Couldn’t load your account';
       $('authDescription').textContent = 'Your saved preferences have not been changed.';
       status('Check your connection and try again. If this continues, the account service may need attention.', 'error');
       $('retrySettings').hidden = false;
@@ -178,9 +179,27 @@
   });
   async function signOut() {
     if (!client || busy) return;
+    const signOutVersion = version;
     setBusy(true);
     $('signOutBtn').disabled = true;
     $('authSignOut').disabled = true;
+    $('app').inert = true;
+    try {
+      await FinTrackData.flush();
+    } catch (error) {
+      setBusy(false);
+      $('signOutBtn').disabled = false;
+      $('authSignOut').disabled = false;
+      $('app').inert = false;
+      return;
+    }
+    $('app').inert = false;
+    if (signOutVersion !== version) {
+      setBusy(false);
+      $('signOutBtn').disabled = false;
+      $('authSignOut').disabled = false;
+      return;
+    }
     lockDashboard();
     ++version;
     form.hidden = true;
@@ -242,6 +261,7 @@
         storageKey: `fintrack-${url.hostname}-auth` }
     });
     store = createSettingsStore(client);
+    FinTrackData.connect(client);
     client.auth.onAuthStateChange(onSession);
     // getSession surfaces initialization errors; INITIAL_SESSION drives the UI.
     client.auth.getSession().then(({ error }) => {

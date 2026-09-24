@@ -8,12 +8,20 @@ A static personal-finance dashboard with Supabase email/password accounts and pe
 - Save base currency, daily allowance and its currency, baseline monthly burn, and projection horizon.
 - Restore saved settings after refresh or sign-in on another device. Save confirmation appears only after a database response.
 - Preferences are protected by database row-level security. Password handling and session refresh use the official Supabase client.
-- Existing financial figures, transactions, goals, and scenarios are **sample data**, not account-owned financial records. Transaction edits remain temporary and clear on sign-out. Currency preferences do not convert the sample figures. Other devices see settings on their next page load/sign-in; this version does not provide live simultaneous editing (last successful save wins).
+- Transactions, scenario sliders, chart selection, current view and unfinished transaction entries autosave to the account. The “All changes saved” indicator confirms the database response. Logout flushes pending saves and stays on the page if a save fails; Retry saving preserves the current edits.
+- New accounts start with an empty transaction list. Net-worth, goal and projection illustrations remain **sample data**. Currency preferences do not convert those figures.
+- Other devices retrieve saved data on their next load/sign-in. App data uses revision checks: a stale tab/device cannot overwrite a newer saved version. A conflict keeps local edits visible and asks the user to copy unsaved entries before reloading. Preferences still use last successful save wins.
+
+## Upgrade an existing deployment for persistent transactions
+
+Run [`supabase/persistent-data.sql`](supabase/persistent-data.sql) in the Supabase SQL Editor **before publishing this version**. It adds a separate account-data table with per-user row-level security and leaves existing preferences intact. Do not rerun the original schema on an existing project. The app keeps the dashboard hidden if it cannot load account data, including when this migration is missing.
+
+Previously added transactions that disappeared on logout in the old version were never stored and cannot be recovered from Supabase. This version saves new entries. Keep the page open if saving fails; unsaved data is held in memory, not in an offline database. Browser-close warnings are best-effort and cannot prevent OS/browser crashes.
 
 ## Connect Supabase before publishing
 
 1. Create a project at <https://supabase.com/dashboard>.
-2. Open its SQL Editor and run [`supabase/schema.sql`](supabase/schema.sql) once. This creates `public.user_settings`, grants only the required operations, and enables policies that restrict reads and writes to the signed-in user's ID. Ensure the `public` schema is exposed through the project's Data API.
+2. Open its SQL Editor and run [`supabase/schema.sql`](supabase/schema.sql) and then [`supabase/persistent-data.sql`](supabase/persistent-data.sql), each once. These create the settings and account-data tables with policies restricting reads and writes to the signed-in user's ID. Ensure the `public` schema is exposed through the project's Data API.
 3. Enable the Email authentication provider and keep email confirmation enabled. Set the minimum password length to at least 12 characters in the provider's password settings. Configure email delivery/SMTP for intended users; Supabase's default mail service may restrict recipients and rate-limit delivery.
 4. In Authentication URL Configuration, set **Site URL** to:
 
@@ -57,12 +65,12 @@ pnpm install --frozen-lockfile
 pnpm test
 ```
 
-The tests use jsdom and a simulated Supabase client to verify login errors, signup/recovery handling, preference persistence across fresh pages, account switching, failed reads/writes, stale responses after sign-out, and text-safe transaction rendering. These tests do **not** establish that the deployed database policies or email delivery are configured correctly.
+The tests use jsdom and a simulated Supabase client to verify login errors, signup/recovery handling, persistence across fresh pages, account switching, failed reads/writes, queued saves, logout flushing, multi-device conflicts, stale responses after sign-out, and text-safe transaction rendering. These tests do **not** establish that the deployed database policies or email delivery are configured correctly.
 
 ## Live verification after setup
 
 1. Register two test users and confirm both emails. Confirm a wrong password is rejected.
-2. Save different settings in each account. Refresh, sign out/in, and sign in from another browser/device; each should retrieve only its own saved settings.
+2. Add different transactions, scenario values and settings in each account. Wait for “All changes saved,” refresh, sign out/in, and sign in from another browser/device; each should retrieve only its own saved data.
 3. Cancel wizard edits and confirm the previous settings remain.
 4. Disconnect the network while saving: the wizard should retain the draft and show that the save could not be confirmed. Reconnect and retry.
 5. Request a password reset; follow its email link and confirm that the new password works.
@@ -73,8 +81,10 @@ The tests use jsdom and a simulated Supabase client to verify login errors, sign
 - `index.html`: dashboard and preference wizard.
 - `accounts.js`, `accounts.css`: account UI, session handling, and sign-in gate.
 - `preferences.js`, `settings-store.js`: preference validation and scoped database reads/writes.
+- `app-state.js`, `account-data.js`: validated account data, autosave queue, save status and conflict checks.
 - `config.js`: public Supabase connection values.
 - `supabase/schema.sql`: database setup and authorization policies.
+- `supabase/persistent-data.sql`: additional account-data table and authorization policies.
 - `vendor/supabase.js`: official `@supabase/supabase-js` **2.117.1** browser bundle, downloaded from jsDelivr; MIT license included alongside it. Vendored so the app does not depend on an unpinned CDN script at runtime.
 
 Official references: [email/password authentication](https://supabase.com/docs/guides/auth/passwords), [row-level security](https://supabase.com/docs/guides/database/postgres/row-level-security), [redirect URLs](https://supabase.com/docs/guides/auth/redirect-urls), [email delivery](https://supabase.com/docs/guides/auth/auth-smtp).

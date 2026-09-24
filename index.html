@@ -139,14 +139,15 @@ input[type=range]{accent-color:var(--blue);padding:0}
       <div class="title" id="pageTitle">Dashboard</div>
       <div class="actions">
         <button class="cta secondary" onclick="openWizard()">Setup wizard</button>
-        <button class="cta secondary" onclick="addDemo()">+ Transaction</button>
+        <button class="cta secondary" onclick="show('transactions');document.getElementById('name').focus()">+ Transaction</button>
         <button class="cta" onclick="show('scenarios')">Run scenario</button>
         <span class="accountEmail" id="accountEmail"></span>
         <button class="cta secondary" id="signOutBtn" type="button">Sign out</button>
       </div>
     </header>
 
-    <div class="demoNotice">Dashboard figures and transactions are sample data. Your preferences are saved to your account.</div>
+    <div class="demoNotice">Net worth, goals and projection charts contain sample figures. Transactions, scenario inputs and preferences are saved to your account.</div>
+    <div style="padding:10px 22px"><span id="dataStatus" class="status" role="status" aria-live="polite"></span> <button id="retryData" class="textButton" type="button" hidden>Retry saving</button></div>
     <div class="content">
       <section id="dashboard" class="view active">
         <div class="metrics">
@@ -220,12 +221,13 @@ input[type=range]{accent-color:var(--blue);padding:0}
         <div class="card">
           <h2>Add transaction</h2>
           <div class="formGrid">
-            <input id="name" placeholder="Description">
+            <input id="name" placeholder="Description" maxlength="200" aria-label="Transaction description">
             <input id="amount" type="number" placeholder="Amount">
             <select id="type"><option>Expense</option><option>Income</option><option>Investment</option><option>Transfer</option><option>One-off</option></select>
             <select id="cat"><option>Food</option><option>Home</option><option>Child</option><option>Salary</option><option>Investment</option><option>Vacation</option></select>
           </div>
           <button class="cta" onclick="addCustom()">Add</button>
+          <p id="transactionStatus" class="status error" role="status"></p>
         </div>
         <div class="card" style="margin-top:14px">
           <h2>All transactions</h2>
@@ -384,15 +386,11 @@ input[type=range]{accent-color:var(--blue);padding:0}
 <script src="config.js"></script>
 <script src="preferences.js"></script>
 <script src="settings-store.js"></script>
+<script src="app-state.js"></script>
 <script>
-const tx=[
-{name:'Salary',type:'Income',cat:'Salary',amt:31500},
-{name:'SXR8 buy',type:'Investment',cat:'Investment',amt:-6276},
-{name:'Groceries',type:'Expense',cat:'Food',amt:-2800},
-{name:'Child / medical',type:'Expense',cat:'Child',amt:-1500},
-{name:'Rent income',type:'Income',cat:'Income',amt:2900},
-{name:'Vacation',type:'One-off',cat:'Vacation',amt:-13075}
-];
+const tx=[];
+let currentChart='base';
+let currentView='dashboard';
 
 let currentStep=0;
 let selectedCurrency='RON';
@@ -413,15 +411,24 @@ function show(id,btn){
   document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active')); if(btn) btn.classList.add('active');
   const m={dashboard:'Dashboard',transactions:'Transactions',networth:'Net worth',projection:'Projection',scenarios:'Scenarios',goals:'Goals',preferences:'Preferences'};
   document.getElementById('pageTitle').textContent=m[id];
+  currentView=id;
+  document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.textContent===m[id]));
+  window.FinTrackData?.changed();
 }
-function addDemo(){tx.unshift({name:'Coffee + snack',type:'Expense',cat:'Food',amt:-42});render()}
 function addCustom(){
-  const name=document.getElementById('name').value||'New item';
-  const amt=Number(document.getElementById('amount').value||0);
+  if(!window.FinTrackAccount?.isReady())return;
+  const name=document.getElementById('name').value.trim();
+  const amt=document.getElementById('amount').valueAsNumber;
   const type=document.getElementById('type').value;
   const cat=document.getElementById('cat').value;
-  tx.unshift({name,type,cat,amt:type==='Income'?Math.abs(amt):-Math.abs(amt)});
+  if(!name || name.length>200 || !Number.isFinite(amt) || amt===0){
+    document.getElementById('transactionStatus').textContent='Enter a description and a valid non-zero amount.';return;
+  }
+  tx.unshift({id:crypto.randomUUID(),name,type,cat,amt:type==='Income'?Math.abs(amt):-Math.abs(amt)});
+  document.getElementById('name').value='';document.getElementById('amount').value='';
+  document.getElementById('transactionStatus').textContent='';
   render();
+  window.FinTrackData?.changed();
 }
 function chart(btn,mode){
   btn.parentElement.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));btn.classList.add('active');
@@ -430,6 +437,8 @@ function chart(btn,mode){
   if(mode==='stress') d='M0,160 C90,168 150,156 220,160 C290,166 350,153 420,145 C500,139 560,132 620,122';
   if(mode==='house') d='M0,150 C90,132 160,120 225,112 C275,108 320,180 390,166 C470,150 550,136 620,124';
   l.setAttribute('d',d); a.setAttribute('d',d+' L620,230 L0,230 Z');
+  currentChart=mode;
+  window.FinTrackData?.changed();
 }
 function calc(){
  const inc=+document.getElementById('inc').value,exp=+document.getElementById('exp').value,inv=+document.getElementById('inv').value,evt=+document.getElementById('evt').value,E=5.23;
@@ -553,19 +562,37 @@ async function savePreferences(){
 }
 
 render();calc();
-const demoTransactions=tx.map(t=>({...t}));
 function resetDashboard(){
   ++preferenceSaveVersion;
   savingPreferences=false;closeWizard();
   document.querySelectorAll('#overlay button,#overlay input,#overlay select').forEach(x=>x.disabled=false);
   applyPreferences(FinTrackPreferences.defaults);fillWizard(savedPreferences);
-  tx.splice(0,tx.length,...demoTransactions.map(t=>({...t})));
+  tx.splice(0,tx.length);
+  document.getElementById('transactionStatus').textContent='';
   document.getElementById('name').value='';document.getElementById('amount').value='';
   document.getElementById('type').selectedIndex=0;document.getElementById('cat').selectedIndex=0;
   for(const [id,value] of Object.entries({inc:31500,exp:15000,inv:1200,evt:2500}))document.getElementById(id).value=value;
   chart(document.querySelector('.tab'),'base');render();calc();
   show('dashboard',document.querySelector('.nav'));
   document.getElementById('settingsStatus').textContent='';
+}
+function captureAccountState(){
+  return {transactions:tx.map(t=>({...t})),
+    scenario:Object.fromEntries(['inc','exp','inv','evt'].map(id=>[id,Number(document.getElementById(id).value)])),
+    chart:currentChart,view:currentView,
+    draft:Object.fromEntries(['name','amount','type','cat'].map(id=>[id,document.getElementById(id).value]))};
+}
+function applyAccountState(value){
+  const state=FinTrackState.validate(value);
+  tx.splice(0,tx.length,...state.transactions);
+  for(const [id,value] of Object.entries(state.scenario))document.getElementById(id).value=value;
+  for(const [id,value] of Object.entries(state.draft))document.getElementById(id).value=value;
+  chart(document.querySelectorAll('.tab')[['base','stress','house'].indexOf(state.chart)],state.chart);
+  show(state.view);render();calc();
+}
+for(const id of ['inc','exp','inv','evt','name','amount','type','cat']){
+  document.getElementById(id).addEventListener('input',()=>window.FinTrackData?.changed());
+  document.getElementById(id).addEventListener('change',()=>window.FinTrackData?.changed());
 }
 document.getElementById('overlay').addEventListener('keydown',event=>{
   if(event.key==='Escape'){event.preventDefault();closeWizard();}
@@ -576,6 +603,7 @@ document.getElementById('overlay').addEventListener('keydown',event=>{
   else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}
 });
 </script>
+<script src="account-data.js"></script>
 <script src="accounts.js"></script>
 </body>
 </html>
