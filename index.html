@@ -153,14 +153,168 @@ input[type=range]{accent-color:var(--blue);padding:0}
         <div class="metrics">
           <div class="card hero">
 <div class="kicker">Net worth</div><div class="metric" id="netWorthMetric">Set up your net worth</div><div class="sub" id="netWorthBreakdown"></div><button class="cta secondary" onclick="openWizard(1)">Update net worth</button>
-          </div>
+          </div>YPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>FinTrack</title>
+<meta name="referrer" content="no-referrer">
+<link rel="stylesheet" href="accounts.css?v=e48ce0eff358">
+<style>
+:root{
+  --bg:#f4f6f8; --card:#fff; --text:#111827; --muted:#6b7280; --line:#e5e7eb;
+  --nav:#0f172a; --blue:#2563eb; --green:#10b981; --red:#ef4444; --amber:#f59e0b;
+  --shadow:0 14px 40px rgba(15,23,42,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--text)}
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+aside{background:var(--nav);color:#cbd5e1;padding:22px 16px;display:flex;flex-direction:column}
+.brand{color:white;font-size:20px;font-weight:900;margin:0 8px 24px;display:flex;align-items:center;gap:10px}
+.logo{width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,#38bdf8,#2563eb);display:grid;place-items:center}
+nav{display:grid;gap:6px}
+.nav{border:0;background:transparent;color:#cbd5e1;text-align:left;padding:11px 12px;border-radius:12px;font:inherit;font-weight:750;cursor:pointer}
+.nav:hover,.nav.active{background:white;color:#0f172a}
+.sideNote{margin-top:auto;padding:14px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(255,255,255,.05);font-size:13px;line-height:1.4}
+main{min-width:0}
+header{height:68px;background:rgba(255,255,255,.9);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:4}
+.title{font-size:21px;font-weight:900;letter-spacing:-.03em}
+.actions{display:flex;gap:10px;align-items:center}
+button.cta{border:0;border-radius:12px;padding:10px 14px;font:inherit;font-weight:850;cursor:pointer;background:var(--blue);color:white}
+button.secondary{background:white;color:var(--text);border:1px solid var(--line)}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--nav);color:white;display:grid;place-items:center;font-weight:900}
+.content{padding:22px;overflow:auto}
+.view{display:none}.view.active{display:block}
+.metrics{display:grid;grid-template-columns:1.2fr repeat(3,.8fr);gap:14px;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:var(--shadow)}
+.hero{background:linear-gradient(135deg,#0f172a,#1d4ed8 68%,#0f766e);color:white}
+.kicker{font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:900;color:var(--muted);margin-bottom:8px}
+.hero .kicker{color:#bfdbfe}
+.metric{font-size:31px;font-weight:950;letter-spacing:-.05em}
+.sub{color:var(--muted);font-size:13px;margin-top:5px;line-height:1.4}
+.hero .sub{color:#dbeafe}
+.tag{display:inline-flex;margin-top:12px;padding:6px 9px;border-radius:999px;background:#eef2ff;color:#1d4ed8;font-size:12px;font-weight:850}
+.hero .tag{background:rgba(16,185,129,.18);color:#bbf7d0}
+.grid{display:grid;grid-template-columns:1.5fr .8fr;gap:14px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.card h2{font-size:17px;margin:0 0 14px;letter-spacing:-.03em}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tab{border:1px solid var(--line);background:#f8fafc;color:var(--muted);padding:7px 10px;border-radius:999px;font-weight:800;cursor:pointer}
+.tab.active{background:var(--nav);color:white;border-color:var(--nav)}
+.progressTrack{height:10px;background:#eef2f7;border-radius:999px;overflow:hidden;margin-top:12px}
+.progress{height:100%;width:76%;background:linear-gradient(90deg,var(--blue),var(--green))}
+table{width:100%;border-collapse:collapse}
+th,td{padding:11px 8px;border-bottom:1px solid var(--line);font-size:13px;text-align:right}
+th:first-child,td:first-child{text-align:left}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.income{color:var(--green);font-weight:900}.expense{color:var(--red);font-weight:900}.neutral{color:var(--muted);font-weight:900}
+.insight{padding:12px 0;border-bottom:1px solid var(--line)}.insight:last-child{border-bottom:0}.insight strong{display:block}.insight span{font-size:13px;color:var(--muted)}
+.asset{display:grid;grid-template-columns:36px 1fr auto;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
+.asset:last-child{border-bottom:0}
+.icon{width:36px;height:36px;border-radius:11px;background:#f1f5f9;display:grid;place-items:center}
+.asset strong{display:block}.asset span{color:var(--muted);font-size:12px}.amt{font-weight:900}
+.formGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+input,select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:white;font:inherit}
+.scenario{display:grid;grid-template-columns:.8fr 1.2fr;gap:14px}
+.control{margin-bottom:16px}.controlTop{display:flex;justify-content:space-between;font-weight:800;font-size:13px}.controlTop span{color:var(--blue)}
+input[type=range]{accent-color:var(--blue);padding:0}
+.prefGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.prefItem{padding:14px;border:1px solid var(--line);border-radius:14px;background:#fafafa}
+.prefItem strong{display:block;margin-bottom:5px}
+.prefItem span{font-size:13px;color:var(--muted)}
+/* Wizard */
+.overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+.wizard{width:min(720px,100%);background:white;border-radius:24px;box-shadow:0 30px 90px rgba(0,0,0,.25);overflow:hidden}
+.wizTop{padding:20px 24px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.wizTop h2{margin:0;font-size:22px}
+.stepper{display:flex;gap:7px}
+.stepDot{width:9px;height:9px;border-radius:50%;background:#d1d5db}
+.stepDot.active{background:var(--blue)}
+.wizBody{padding:24px}
+.wizStep{display:none}.wizStep.active{display:block}
+.wizStep h3{margin:0 0 8px;font-size:20px}
+.wizStep p{color:var(--muted);line-height:1.45}
+.choiceGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.choice{padding:14px;border:1px solid var(--line);border-radius:14px;cursor:pointer;background:#fafafa;font-weight:800;text-align:center}
+.choice.active{border-color:var(--blue);background:#eef4ff;color:var(--blue)}
+.wizFooter{padding:18px 24px;border-top:1px solid var(--line);display:flex;justify-content:space-between}
+.ruleBox{margin-top:16px;padding:16px;border-radius:16px;background:#f8fafc;border:1px solid var(--line)}
+.ruleRow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.summaryBox{display:grid;gap:10px;margin-top:14px}
+.summaryRow{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
+.summaryRow:last-child{border-bottom:0}
+@media(max-width:950px){.app{grid-template-columns:1fr}aside{display:none}.metrics,.grid,.row,.scenario{grid-template-columns:1fr}.formGrid,.prefGrid,.choiceGrid,.ruleRow{grid-template-columns:1fr}}
+.wizard{max-height:90vh;overflow:auto}.nwColumns{display:grid;grid-template-columns:1fr 1fr;gap:20px}.nwRow{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:6px;margin:12px 0}.nwRow input{width:100%;min-width:0}.nwRow button{justify-self:start}.summaryRow{gap:12px;overflow-wrap:anywhere}@media(max-width:600px){.nwColumns{grid-template-columns:1fr}}</style>
+</head>
+<body>
+<noscript>FinTrack requires JavaScript to sign in and load your settings.</noscript>
+<section class="authScreen" id="authScreen" aria-label="Account access">
+  <div class="card authCard">
+    <div class="authBrand"><div class="logo">F</div>FinTrack</div>
+    <h1 id="authTitle">Welcome back</h1>
+    <p class="sub" id="authDescription">Sign in to keep your planning preferences with you.</p>
+    <div id="googleAccess" hidden>
+      <button class="cta secondary" id="googleSignIn" type="button">Continue with Google</button>
+      <p class="sub" style="text-align:center">or use your email</p>
+    </div>
+    <form id="authForm" hidden>
+      <div id="emailField"><label for="authEmail">Email</label><input id="authEmail" type="email" autocomplete="email" required maxlength="254"></div>
+      <div id="passwordField"><label for="authPassword">Password</label><input id="authPassword" type="password" autocomplete="current-password" required maxlength="128"></div>
+      <div id="confirmField" hidden><label for="authConfirm">Confirm password</label><input id="authConfirm" type="password" autocomplete="new-password" maxlength="128"></div>
+      <p class="sub" id="passwordHint" hidden>Use at least 12 characters.</p>
+      <button class="cta" id="authSubmit" type="submit">Sign in</button>
+    </form>
+    <p id="authStatus" class="status" role="status" aria-live="polite">Connecting to your account…</p>
+    <div class="authLinks" id="authLinks" hidden>
+      <button class="textButton" id="authToggle" type="button">Create an account</button>
+      <button class="textButton" id="authForgot" type="button">Forgot password?</button>
+    </div>
+    <button class="cta secondary" id="retrySettings" hidden type="button">Try loading again</button>
+    <button class="textButton" id="authSignOut" hidden type="button">Sign out</button>
+  </div>
+</section>
+<div class="app" id="app" hidden>
+  <aside>
+    <div class="brand"><div class="logo">F</div>FinTrack</div>
+    <nav>
+      <button class="nav active" onclick="show('dashboard',this)">Dashboard</button>
+      <button class="nav" onclick="show('transactions',this)">Transactions</button>
+      <button class="nav" onclick="show('networth',this)">Net worth</button>
+      <button class="nav" onclick="show('projection',this)">Projection</button>
+      <button class="nav" onclick="show('scenarios',this)">Scenarios</button>
+      <button class="nav" onclick="show('goals',this)">Goals</button>
+      <button class="nav" onclick="show('preferences',this)">Preferences</button>
+    </nav>
+    <div class="sideNote"><strong style="color:white">MVP mode</strong><br>Manual-first. No bank sync. CSV/Excel export.</div>
+  </aside>
+
+  <main>
+    <header>
+      <div class="title" id="pageTitle">Dashboard</div>
+      <div class="actions">
+        <button class="cta secondary" onclick="openWizard()">Setup wizard</button>
+        <button class="cta secondary" onclick="if(editingId)cancelTransactionEdit();show('transactions');document.getElementById('name').focus()">+ Transaction</button>
+        <button class="cta" onclick="show('scenarios')">Run scenario</button>
+        <span class="accountEmail" id="accountEmail"></span>
+        <button class="cta secondary" id="signOutBtn" type="button">Sign out</button>
+      </div>
+    </header>
+
+    <div class="demoNotice">Charts and goals contain sample figures. Net worth uses your saved assets and liabilities. Transactions, scenario inputs and preferences are saved to your account.</div>
+    <div style="padding:10px 22px"><span id="dataStatus" class="status" role="status" aria-live="polite"></span> <button id="retryData" class="textButton" type="button" hidden>Retry saving</button></div>
+    <div class="content">
+      <section id="dashboard" class="view active">
+        <div class="metrics">
+          <div class="card hero">
+<div class="kicker">Net worth</div><div class="metric" id="netWorthMetric">Set up your net worth</div><div class="sub" id="netWorthBreakdown"></div><button class="cta secondary" onclick="openWizard(1)">Update net worth</button>
+          </div><div class="card" style="margin-bottom:14px">            <div class="kicker">Recorded transaction balance</div><div class="metric" id="transactionBalance">0.00 RON</div><div class="sub">All recorded income minus all recorded outflows, including transfers and investments. This is not your bank balance or net worth.</div><div class="sub">Income: <span id="transactionIncome">0.00 RON</span><br>Outflows: <span id="transactionOutflow">0.00 RON</span></div></div>
           <div class="card"><div class="kicker">True monthly burn</div><div class="metric" id="burnMetric">15,000 RON</div><div class="sub">Excludes investments, transfers & one-offs</div></div>
           <div class="card"><div class="kicker">Daily untracked allowance</div><div class="metric" id="dailyMetric">100 RON</div><div class="sub">Automatically deducted daily</div></div>
           <div class="card"><div class="kicker">Projection horizon</div><div class="metric" id="horizonMetric">12 mo</div><div class="sub">Current planning window</div></div>
         </div>
 
         
-<div class="card" style="margin-bottom:14px">            <div class="kicker">Recorded transaction balance</div><div class="metric" id="transactionBalance">0.00 RON</div><div class="sub">All recorded income minus all recorded outflows, including transfers and investments. This is not your bank balance or net worth.</div><div class="sub">Income: <span id="transactionIncome">0.00 RON</span><br>Outflows: <span id="transactionOutflow">0.00 RON</span></div></div>
 <div class="grid">
           <div>
             <div class="row">
