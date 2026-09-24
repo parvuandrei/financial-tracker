@@ -4,6 +4,10 @@ A static personal-finance dashboard with Supabase email/password accounts and pe
 
 ## Current scope
 
+- The dashboard headline is the recorded transaction balance: income minus every recorded outflow (including transfers and investments), in RON. It is not net worth or a bank balance. Amounts display cents.
+- Each transaction has Edit and Delete controls. Edits replace the same record and persist; Cancel leaves the original unchanged. Unfinished edit drafts restore after refresh. Undo last deletion restores deleted entries in reverse order during the current session; the undo history clears on refresh/logout.
+- Static sample charts, net-worth metrics, goals and sample insights have individual Demo badges. No additional database migration is needed for these controls.
+
 - Sign up, confirm email, sign in, sign out on this browser, and reset a password by email.
 - Save base currency, daily allowance and its currency, baseline monthly burn, and projection horizon.
 - Restore saved settings after refresh or sign-in on another device. Save confirmation appears only after a database response.

@@ -1,6 +1,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
+const vm = require('node:vm');
 const path = require('node:path');
 const { JSDOM } = require('jsdom');
 const preferences = require('../preferences.js');
@@ -82,10 +83,11 @@ function harness(t, options = {}) {
   };
   w.FINTRACK_CONFIG = options.unconfigured ? {} : { supabaseUrl: 'https://testing.supabase.co', supabasePublishableKey: 'sb_publishable_test' };
   w.supabase = { createClient: () => client };
-  for (const file of ['preferences.js', 'settings-store.js', 'app-state.js']) w.eval(read(file));
-  for (const script of w.document.querySelectorAll('script:not([src])')) w.eval(script.textContent);
-  w.eval(read('account-data.js'));
-  w.eval(read('accounts.js'));
+  const run=code=>vm.runInContext(code,dom.getInternalVMContext());
+  for (const file of ['preferences.js', 'settings-store.js', 'app-state.js','transaction-tools.js']) run(read(file));
+  for (const script of w.document.querySelectorAll('script:not([src])')) run(script.textContent);
+  run(read('account-data.js'));
+  run(read('accounts.js'));
   const $ = id => w.document.getElementById(id);
   async function submit(email, password = 'test-password-123') {
     $('authEmail').value = email; $('authPassword').value = password;
@@ -365,4 +367,62 @@ test('Add starts a save immediately and shows progress until the server confirms
   assert.equal(h.$('addTransactionBtn').disabled,false);
   assert.equal(h.$('transactionStatus').textContent,'All changes saved');
   assert.equal(h.appDb.get(alice.id).state.transactions[0].name,'Visible save');
+});
+
+test('balance totals reflect recorded income and every outflow, including cents',async t=>{
+  const h=harness(t,{user:alice,db:new Map([[alice.id,row(alice)]])});await flush();
+  assert.equal(h.$('transactionBalance').textContent,'0.00 RON');
+  for(const [type,amount] of [['Income','100.25'],['Expense','10.10'],['Transfer','20'],['Investment','5']]){
+    h.$('name').value=type;h.$('amount').value=amount;h.$('type').value=type;h.w.addCustom();await h.w.FinTrackData.flush();
+  }
+  assert.equal(h.$('transactionBalance').textContent,'65.15 RON');
+  assert.equal(h.$('transactionIncome').textContent,'100.25 RON');
+  assert.equal(h.$('transactionOutflow').textContent,'35.10 RON');
+});
+
+test('editing updates the existing transaction, totals and persisted state without a duplicate',async t=>{
+  const db=new Map([[alice.id,row(alice)]]),appDb=new Map();const h=harness(t,{user:alice,db,appDb});await flush();
+  h.$('name').value='Original';h.$('amount').value='20';h.w.addCustom();await h.w.FinTrackData.flush();
+  const id=h.w.captureAccountState().transactions[0].id;
+  h.w.editTransaction(id);h.$('name').value='Corrected';h.$('amount').value='35.50';h.w.addCustom();await h.w.FinTrackData.flush();
+  assert.equal(h.w.captureAccountState().transactions.length,1);
+  assert.equal(h.w.captureAccountState().transactions[0].id,id);
+  assert.equal(h.$('transactionBalance').textContent,'-35.50 RON');
+  const fresh=harness(t,{user:alice,db,appDb});await flush();
+  assert.match(fresh.$('all').textContent,/Corrected/);
+  assert.equal(fresh.$('transactionBalance').textContent,'-35.50 RON');
+});
+
+test('edit drafts survive refresh and cancel leaves original transaction unchanged',async t=>{
+  const db=new Map([[alice.id,row(alice)]]),appDb=new Map();const h=harness(t,{user:alice,db,appDb});await flush();
+  h.$('name').value='Original';h.$('amount').value='20';h.w.addCustom();await h.w.FinTrackData.flush();
+  h.w.editTransaction(h.w.captureAccountState().transactions[0].id);h.$('amount').value='99';h.w.FinTrackData.changed();await h.w.FinTrackData.flush();
+  const fresh=harness(t,{user:alice,db,appDb});await flush();
+  assert.equal(fresh.$('transactionFormTitle').textContent,'Edit transaction');
+  assert.equal(fresh.$('amount').value,'99');
+  fresh.w.cancelTransactionEdit();await fresh.w.FinTrackData.flush();
+  assert.equal(fresh.w.captureAccountState().transactions[0].amt,-20);
+});
+
+test('Delete and Undo persist correctly and undo cannot restore another account’s entries',async t=>{
+  const db=new Map([[alice.id,row(alice)],[bob.id,row(bob)]]),appDb=new Map();const h=harness(t,{user:alice,db,appDb});await flush();
+  h.$('name').value='Remove me';h.$('amount').value='12';h.w.addCustom();await h.w.FinTrackData.flush();
+  const id=h.w.captureAccountState().transactions[0].id;
+  h.w.deleteTransaction(id);await h.w.FinTrackData.flush();
+  assert.equal(appDb.get(alice.id).state.transactions.length,0);
+  assert.equal(h.$('transactionBalance').textContent,'0.00 RON');
+  h.w.undoTransactionDelete();await h.w.FinTrackData.flush();
+  assert.equal(appDb.get(alice.id).state.transactions[0].id,id);
+  h.w.deleteTransaction(id);await h.w.FinTrackData.flush();
+  h.emit('SIGNED_OUT',null);h.emit('SIGNED_IN',bob);await flush();
+  h.w.undoTransactionDelete();assert.equal(h.w.captureAccountState().transactions.length,0);
+  assert.equal(h.$('undoTransaction').hidden,true);
+});
+
+test('sample cards have Demo badges while the real balance does not',async t=>{
+  const h=harness(t);await flush();
+  for(const selector of ['#networth .card','#projection .card','#goals .card']){
+    for(const card of h.w.document.querySelectorAll(selector))assert.ok(card.querySelector('.demoBadge'));
+  }
+  assert.equal(h.$('transactionBalance').closest('.card').querySelector('.demoBadge'),null);
 });

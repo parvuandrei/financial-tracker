@@ -12,7 +12,7 @@
     const button = document.getElementById('addTransactionBtn');
     const saving = text === 'Saving…';
     button.disabled = saving;
-    button.textContent = saving ? 'Saving…' : 'Add';
+    button.textContent = saving ? 'Saving…' : (editingId ? 'Save changes' : 'Add');
     button.setAttribute('aria-busy', String(saving));
   };
   function clear() {

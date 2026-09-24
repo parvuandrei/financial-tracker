@@ -31,7 +31,8 @@
       || d.amount.length > 100 || !types.includes(d.type) || !categories.includes(d.cat))
       throw new Error('Invalid transaction draft.');
     return { transactions, scenario, chart: value.chart, view: value.view,
-      draft: { name: d.name, amount: d.amount, type: d.type, cat: d.cat } };
+      draft: { name: d.name, amount: d.amount, type: d.type, cat: d.cat,
+        editId: typeof d.editId==='string' && transactions.some(t=>t.id===d.editId) ? d.editId : null } };
   }
   function createStore(client) {
     return {
