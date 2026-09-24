@@ -1,0 +1,9 @@
+{
+  "name": "financial-tracker",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/*.test.cjs",
+    "start": "node scripts/serve.cjs"
+  },
+  "devDependencies": { "jsdom": "26.1.0" }
+}
