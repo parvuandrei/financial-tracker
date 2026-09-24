@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>FinTrack Dashboard Mockup</title>
+<style>
+:root{
+  --bg:#f4f6f8; --card:#fff; --text:#111827; --muted:#6b7280; --line:#e5e7eb;
+  --nav:#0f172a; --blue:#2563eb; --green:#10b981; --red:#ef4444; --amber:#f59e0b;
+  --shadow:0 14px 40px rgba(15,23,42,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--text)}
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+aside{background:var(--nav);color:#cbd5e1;padding:22px 16px;display:flex;flex-direction:column}
+.brand{color:white;font-size:20px;font-weight:900;margin:0 8px 24px;display:flex;align-items:center;gap:10px}
+.logo{width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,#38bdf8,#2563eb);display:grid;place-items:center}
+nav{display:grid;gap:6px}
+.nav{border:0;background:transparent;color:#cbd5e1;text-align:left;padding:11px 12px;border-radius:12px;font:inherit;font-weight:750;cursor:pointer}
+.nav:hover,.nav.active{background:white;color:#0f172a}
+.sideNote{margin-top:auto;padding:14px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(255,255,255,.05);font-size:13px;line-height:1.4}
+main{min-width:0}
+header{height:68px;background:rgba(255,255,255,.9);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:4}
+.title{font-size:21px;font-weight:900;letter-spacing:-.03em}
+.actions{display:flex;gap:10px;align-items:center}
+button.cta{border:0;border-radius:12px;padding:10px 14px;font:inherit;font-weight:850;cursor:pointer;background:var(--blue);color:white}
+button.secondary{background:white;color:var(--text);border:1px solid var(--line)}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--nav);color:white;display:grid;place-items:center;font-weight:900}
+.content{padding:22px;overflow:auto}
+.view{display:none}.view.active{display:block}
+.metrics{display:grid;grid-template-columns:1.2fr repeat(3,.8fr);gap:14px;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:var(--shadow)}
+.hero{background:linear-gradient(135deg,#0f172a,#1d4ed8 68%,#0f766e);color:white}
+.kicker{font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:900;color:var(--muted);margin-bottom:8px}
+.hero .kicker{color:#bfdbfe}
+.metric{font-size:31px;font-weight:950;letter-spacing:-.05em}
+.sub{color:var(--muted);font-size:13px;margin-top:5px;line-height:1.4}
+.hero .sub{color:#dbeafe}
+.tag{display:inline-flex;margin-top:12px;padding:6px 9px;border-radius:999px;background:#eef2ff;color:#1d4ed8;font-size:12px;font-weight:850}
+.hero .tag{background:rgba(16,185,129,.18);color:#bbf7d0}
+.grid{display:grid;grid-template-columns:1.5fr .8fr;gap:14px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.card h2{font-size:17px;margin:0 0 14px;letter-spacing:-.03em}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tab{border:1px solid var(--line);background:#f8fafc;color:var(--muted);padding:7px 10px;border-radius:999px;font-weight:800;cursor:pointer}
+.tab.active{background:var(--nav);color:white;border-color:var(--nav)}
+.progressTrack{height:10px;background:#eef2f7;border-radius:999px;overflow:hidden;margin-top:12px}
+.progress{height:100%;width:76%;background:linear-gradient(90deg,var(--blue),var(--green))}
+table{width:100%;border-collapse:collapse}
+th,td{padding:11px 8px;border-bottom:1px solid var(--line);font-size:13px;text-align:right}
+th:first-child,td:first-child{text-align:left}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.income{color:var(--green);font-weight:900}.expense{color:var(--red);font-weight:900}.neutral{color:var(--muted);font-weight:900}
+.insight{padding:12px 0;border-bottom:1px solid var(--line)}.insight:last-child{border-bottom:0}.insight strong{display:block}.insight span{font-size:13px;color:var(--muted)}
+.asset{display:grid;grid-template-columns:36px 1fr auto;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
+.asset:last-child{border-bottom:0}
+.icon{width:36px;height:36px;border-radius:11px;background:#f1f5f9;display:grid;place-items:center}
+.asset strong{display:block}.asset span{color:var(--muted);font-size:12px}.amt{font-weight:900}
+.formGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+input,select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:white;font:inherit}
+.scenario{display:grid;grid-template-columns:.8fr 1.2fr;gap:14px}
+.control{margin-bottom:16px}.controlTop{display:flex;justify-content:space-between;font-weight:800;font-size:13px}.controlTop span{color:var(--blue)}
+input[type=range]{accent-color:var(--blue);padding:0}
+.prefGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.prefItem{padding:14px;border:1px solid var(--line);border-radius:14px;background:#fafafa}
+.prefItem strong{display:block;margin-bottom:5px}
+.prefItem span{font-size:13px;color:var(--muted)}
+/* Wizard */
+.overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+.wizard{width:min(720px,100%);background:white;border-radius:24px;box-shadow:0 30px 90px rgba(0,0,0,.25);overflow:hidden}
+.wizTop{padding:20px 24px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.wizTop h2{margin:0;font-size:22px}
+.stepper{display:flex;gap:7px}
+.stepDot{width:9px;height:9px;border-radius:50%;background:#d1d5db}
+.stepDot.active{background:var(--blue)}
+.wizBody{padding:24px}
+.wizStep{display:none}.wizStep.active{display:block}
+.wizStep h3{margin:0 0 8px;font-size:20px}
+.wizStep p{color:var(--muted);line-height:1.45}
+.choiceGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.choice{padding:14px;border:1px solid var(--line);border-radius:14px;cursor:pointer;background:#fafafa;font-weight:800;text-align:center}
+.choice.active{border-color:var(--blue);background:#eef4ff;color:var(--blue)}
+.wizFooter{padding:18px 24px;border-top:1px solid var(--line);display:flex;justify-content:space-between}
+.ruleBox{margin-top:16px;padding:16px;border-radius:16px;background:#f8fafc;border:1px solid var(--line)}
+.ruleRow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.summaryBox{display:grid;gap:10px;margin-top:14px}
+.summaryRow{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
+.summaryRow:last-child{border-bottom:0}
+@media(max-width:950px){.app{grid-template-columns:1fr}aside{display:none}.metrics,.grid,.row,.scenario{grid-template-columns:1fr}.formGrid,.prefGrid,.choiceGrid,.ruleRow{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand"><div class="logo">F</div>FinTrack</div>
+    <nav>
+      <button class="nav active" onclick="show('dashboard',this)">Dashboard</button>
+      <button class="nav" onclick="show('transactions',this)">Transactions</button>
+      <button class="nav" onclick="show('networth',this)">Net worth</button>
+      <button class="nav" onclick="show('projection',this)">Projection</button>
+      <button class="nav" onclick="show('scenarios',this)">Scenarios</button>
+      <button class="nav" onclick="show('goals',this)">Goals</button>
+      <button class="nav" onclick="show('preferences',this)">Preferences</button>
+    </nav>
+    <div class="sideNote"><strong style="color:white">MVP mode</strong><br>Manual-first. No bank sync. CSV/Excel export.</div>
+  </aside>
+
+  <main>
+    <header>
+      <div class="title" id="pageTitle">Dashboard</div>
+      <div class="actions">
+        <button class="cta secondary" onclick="openWizard()">Setup wizard</button>
+        <button class="cta secondary" onclick="addDemo()">+ Transaction</button>
+        <button class="cta" onclick="show('scenarios')">Run scenario</button>
+        <div class="avatar">A</div>
+      </div>
+    </header>
+
+    <div class="content">
+      <section id="dashboard" class="view active">
+        <div class="metrics">
+          <div class="card hero">
+            <div class="kicker">Net worth</div>
+            <div class="metric">$735,971</div>
+            <div class="sub">No active debt · multi-asset household</div>
+            <div class="tag">▲ financially strong</div>
+          </div>
+          <div class="card"><div class="kicker">True monthly burn</div><div class="metric" id="burnMetric">15,000 RON</div><div class="sub">Excludes investments, transfers & one-offs</div></div>
+          <div class="card"><div class="kicker">Daily untracked allowance</div><div class="metric" id="dailyMetric">100 RON</div><div class="sub">Automatically deducted daily</div></div>
+          <div class="card"><div class="kicker">Projection horizon</div><div class="metric" id="horizonMetric">12 mo</div><div class="sub">Current planning window</div></div>
+        </div>
+
+        <div class="grid">
+          <div>
+            <div class="row">
+              <div class="card">
+                <h2>Balance projection</h2>
+                <div class="tabs"><button class="tab active" onclick="chart(this,'base')">Base</button><button class="tab" onclick="chart(this,'stress')">Stress</button><button class="tab" onclick="chart(this,'house')">House</button></div>
+                <svg viewBox="0 0 620 230">
+                  <defs><linearGradient id="a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2563eb" stop-opacity=".22"/><stop offset="1" stop-color="#2563eb" stop-opacity="0"/></linearGradient></defs>
+                  <path id="area" d="M0,190 C90,170 150,155 210,150 C280,138 330,105 390,88 C470,66 530,45 620,26 L620,230 L0,230 Z" fill="url(#a)"/>
+                  <path id="line" d="M0,190 C90,170 150,155 210,150 C280,138 330,105 390,88 C470,66 530,45 620,26" fill="none" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
+                  <g fill="#6b7280" font-size="13" font-weight="700"><text x="0" y="220">Sep</text><text x="120" y="220">Oct</text><text x="240" y="220">Nov</text><text x="360" y="220">Dec</text><text x="480" y="220">Jan</text></g>
+                </svg>
+              </div>
+
+              <div class="card">
+                <h2>Next goal</h2>
+                <div class="kicker">SXR8 milestone</div>
+                <div class="metric">$100k</div>
+                <div class="sub">Target after portfolio consolidation.</div>
+                <div class="progressTrack"><div class="progress"></div></div>
+                <div class="sub">76% of target</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <h2>Recent activity</h2>
+              <table>
+                <thead><tr><th>Item</th><th>Type</th><th>Amount</th></tr></thead>
+                <tbody id="recent"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div>
+            <div class="card" style="margin-bottom:14px">
+              <h2>Net worth mix</h2>
+              <svg viewBox="0 0 300 180">
+                <circle cx="95" cy="88" r="62" fill="none" stroke="#e5e7eb" stroke-width="26"/>
+                <circle cx="95" cy="88" r="62" fill="none" stroke="#2563eb" stroke-width="26" stroke-dasharray="246 390" transform="rotate(-90 95 88)"/>
+                <circle cx="95" cy="88" r="62" fill="none" stroke="#10b981" stroke-width="26" stroke-dasharray="70 390" stroke-dashoffset="-246" transform="rotate(-90 95 88)"/>
+                <circle cx="95" cy="88" r="62" fill="none" stroke="#f59e0b" stroke-width="26" stroke-dasharray="44 390" stroke-dashoffset="-316" transform="rotate(-90 95 88)"/>
+                <text x="95" y="85" text-anchor="middle" font-size="22" font-weight="900">63%</text><text x="95" y="105" text-anchor="middle" font-size="11" fill="#6b7280">real estate</text>
+                <g font-size="12" fill="#374151" font-weight="800"><rect x="185" y="48" width="9" height="9" rx="2" fill="#2563eb"/><text x="202" y="57">Real estate</text><rect x="185" y="78" width="9" height="9" rx="2" fill="#10b981"/><text x="202" y="87">Liquid</text><rect x="185" y="108" width="9" height="9" rx="2" fill="#f59e0b"/><text x="202" y="117">Pension</text></g>
+              </svg>
+            </div>
+            <div class="card">
+              <h2>Insights</h2>
+              <div class="insight"><strong>No active debt</strong><span>Your displayed net worth is actual net worth, not gross assets.</span></div>
+              <div class="insight"><strong>Daily small-spend rule active</strong><span id="ruleInsight">100 RON/day is deducted automatically without detailed tracking.</span></div>
+              <div class="insight"><strong>High real-estate exposure</strong><span>New investing should improve liquidity and diversification.</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="transactions" class="view">
+        <div class="card">
+          <h2>Add transaction</h2>
+          <div class="formGrid">
+            <input id="name" placeholder="Description">
+            <input id="amount" type="number" placeholder="Amount">
+            <select id="type"><option>Expense</option><option>Income</option><option>Investment</option><option>Transfer</option><option>One-off</option></select>
+            <select id="cat"><option>Food</option><option>Home</option><option>Child</option><option>Salary</option><option>Investment</option><option>Vacation</option></select>
+          </div>
+          <button class="cta" onclick="addCustom()">Add</button>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <h2>All transactions</h2>
+          <table><thead><tr><th>Item</th><th>Type</th><th>Category</th><th>Amount</th></tr></thead><tbody id="all"></tbody></table>
+        </div>
+      </section>
+
+      <section id="networth" class="view">
+        <div class="metrics">
+          <div class="card hero"><div class="kicker">Net worth</div><div class="metric">$735,971</div><div class="sub">635,680 EUR</div></div>
+          <div class="card"><div class="kicker">Real estate</div><div class="metric">€397k</div><div class="sub">Existing property</div></div>
+          <div class="card"><div class="kicker">Liquid & receivables</div><div class="metric">~€150k</div><div class="sub">Cash + investments + receivables</div></div>
+          <div class="card"><div class="kicker">Debt</div><div class="metric">€0</div><div class="sub">No active credit</div></div>
+        </div>
+        <div class="card">
+          <h2>Assets</h2>
+          <div class="asset"><div class="icon">🏠</div><div><strong>Primary property</strong><span>Real estate</span></div><div class="amt">€215,000</div></div>
+          <div class="asset"><div class="icon">🏢</div><div><strong>Investment apartment</strong><span>Real estate</span></div><div class="amt">€170,000</div></div>
+          <div class="asset"><div class="icon">💵</div><div><strong>Cash & receivables</strong><span>Cash, payout, inheritance</span></div><div class="amt">~€105,000</div></div>
+          <div class="asset"><div class="icon">📈</div><div><strong>Investments</strong><span>SXR8, stocks, crypto</span></div><div class="amt">~€68,000</div></div>
+          <div class="asset"><div class="icon">🧓</div><div><strong>Pensions / safety</strong><span>Long-term reserves</span></div><div class="amt">~€70,000</div></div>
+        </div>
+      </section>
+
+      <section id="projection" class="view">
+        <div class="card">
+          <h2>Future balance timeline</h2>
+          <table><thead><tr><th>Month</th><th>Cash</th><th>Investments</th><th>Net worth est.</th><th>Event</th></tr></thead>
+          <tbody><tr><td>Sep</td><td>€22k</td><td>$80k</td><td>$742k</td><td>Normal month</td></tr><tr><td>Oct</td><td>€27k</td><td>$83k</td><td>$750k</td><td>DCA</td></tr><tr><td>Nov</td><td>€35k</td><td>$100k+</td><td>$760k+</td><td>Consolidation</td></tr><tr><td>Dec</td><td>€50k+</td><td>$100k–130k</td><td>$765k+</td><td>UI payout</td></tr><tr><td>Jan</td><td>depends</td><td>$100k+ untouched</td><td>depends</td><td>Next job / house decision</td></tr></tbody></table>
+        </div>
+      </section>
+
+      <section id="scenarios" class="view">
+        <div class="scenario">
+          <div class="card">
+            <h2>Scenario builder</h2>
+            <div class="control"><div class="controlTop"><span>Monthly income</span><span id="incV">31,500 RON</span></div><input id="inc" type="range" min="18000" max="50000" step="500" value="31500" oninput="calc()"></div>
+            <div class="control"><div class="controlTop"><span>Monthly expenses</span><span id="expV">15,000 RON</span></div><input id="exp" type="range" min="8000" max="26000" step="500" value="15000" oninput="calc()"></div>
+            <div class="control"><div class="controlTop"><span>Monthly investing</span><span id="invV">1,200 EUR</span></div><input id="inv" type="range" min="0" max="3000" step="100" value="1200" oninput="calc()"></div>
+            <div class="control"><div class="controlTop"><span>One-off event</span><span id="evtV">2,500 EUR</span></div><input id="evt" type="range" min="0" max="15000" step="500" value="2500" oninput="calc()"></div>
+          </div>
+          <div class="card">
+            <h2>Scenario result</h2>
+            <div class="metrics" style="grid-template-columns:1fr 1fr;margin-bottom:12px">
+              <div class="card" style="box-shadow:none;background:#f8fafc"><div class="kicker">Monthly surplus</div><div class="metric" id="monthly">—</div></div>
+              <div class="card" style="box-shadow:none;background:#f8fafc"><div class="kicker">6m change</div><div class="metric" id="six">—</div></div>
+            </div>
+            <table><thead><tr><th>Month</th><th>Surplus</th><th>Cumulative</th></tr></thead><tbody id="scenarioRows"></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <section id="goals" class="view">
+        <div class="row">
+          <div class="card"><h2>100k USD invested</h2><div class="metric">$100,000</div><div class="progressTrack"><div class="progress" style="width:82%"></div></div><div class="sub">Near-term milestone</div></div>
+          <div class="card"><h2>1M USD net worth</h2><div class="metric">$1,000,000</div><div class="progressTrack"><div class="progress" style="width:74%"></div></div><div class="sub">Long-term milestone</div></div>
+        </div>
+      </section>
+
+      <section id="preferences" class="view">
+        <div class="card">
+          <h2>User preferences</h2>
+          <div class="prefGrid">
+            <div class="prefItem"><strong>Base currency</strong><span id="prefCurrency">RON</span></div>
+            <div class="prefItem"><strong>Daily untracked allowance</strong><span id="prefDaily">100 RON/day</span></div>
+            <div class="prefItem"><strong>Projection horizon</strong><span id="prefHorizon">12 months</span></div>
+            <div class="prefItem"><strong>Baseline monthly burn</strong><span id="prefBurn">15,000 RON</span></div>
+          </div>
+          <button class="cta" style="margin-top:16px" onclick="openWizard()">Edit with wizard</button>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="wizard">
+    <div class="wizTop">
+      <h2>Quick setup</h2>
+      <div class="stepper">
+        <div class="stepDot active"></div><div class="stepDot"></div><div class="stepDot"></div><div class="stepDot"></div>
+      </div>
+    </div>
+
+    <div class="wizBody">
+      <div class="wizStep active" data-step="0">
+        <h3>1. Choose your base currency</h3>
+        <p>This controls how your day-to-day budget and most dashboard values are shown.</p>
+        <div class="choiceGrid">
+          <div class="choice active" data-currency="RON" onclick="chooseCurrency(this)">RON</div>
+          <div class="choice" data-currency="EUR" onclick="chooseCurrency(this)">EUR</div>
+          <div class="choice" data-currency="USD" onclick="chooseCurrency(this)">USD</div>
+        </div>
+      </div>
+
+      <div class="wizStep" data-step="1">
+        <h3>2. Small daily spending rule</h3>
+        <p>If you do not want to log coffee, snacks, small cash purchases, or other minor expenses, set a daily amount to deduct automatically.</p>
+        <div class="ruleBox">
+          <strong>Daily untracked spending allowance</strong>
+          <div class="ruleRow">
+            <input id="dailyAllowance" type="number" value="100" min="0" step="5">
+            <select id="dailyCurrency">
+              <option>RON</option><option>EUR</option><option>USD</option>
+            </select>
+          </div>
+          <p style="margin-bottom:0">Example: with <strong>100 RON/day</strong>, the app deducts roughly <strong>3,000 RON/month</strong> from projected cashflow without requiring individual transactions.</p>
+        </div>
+      </div>
+
+      <div class="wizStep" data-step="2">
+        <h3>3. Set your planning defaults</h3>
+        <p>These are starting assumptions. You can change them later or override them in scenarios.</p>
+        <div class="ruleRow">
+          <div>
+            <label>Baseline monthly burn</label>
+            <input id="baselineBurn" type="number" value="15000" min="0" step="100">
+          </div>
+          <div>
+            <label>Projection horizon</label>
+            <select id="projectionHorizon">
+              <option value="6">6 months</option>
+              <option value="12" selected>12 months</option>
+              <option value="24">24 months</option>
+              <option value="36">36 months</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="wizStep" data-step="3">
+        <h3>4. Review</h3>
+        <p>Your dashboard will use these preferences as defaults.</p>
+        <div class="summaryBox">
+          <div class="summaryRow"><span>Base currency</span><strong id="sumCurrency">RON</strong></div>
+          <div class="summaryRow"><span>Daily untracked allowance</span><strong id="sumDaily">100 RON/day</strong></div>
+          <div class="summaryRow"><span>Baseline monthly burn</span><strong id="sumBurn">15,000 RON</strong></div>
+          <div class="summaryRow"><span>Projection horizon</span><strong id="sumHorizon">12 months</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wizFooter">
+      <button class="cta secondary" id="backBtn" onclick="backStep()">Back</button>
+      <div style="display:flex;gap:8px">
+        <button class="cta secondary" onclick="closeWizard()">Cancel</button>
+        <button class="cta" id="nextBtn" onclick="nextStep()">Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const tx=[
+{name:'Salary',type:'Income',cat:'Salary',amt:31500},
+{name:'SXR8 buy',type:'Investment',cat:'Investment',amt:-6276},
+{name:'Groceries',type:'Expense',cat:'Food',amt:-2800},
+{name:'Child / medical',type:'Expense',cat:'Child',amt:-1500},
+{name:'Rent income',type:'Income',cat:'Income',amt:2900},
+{name:'Vacation',type:'One-off',cat:'Vacation',amt:-13075}
+];
+
+let currentStep=0;
+let selectedCurrency='RON';
+
+function fmt(n,c='RON'){return (n<0?'-':'')+Math.abs(Math.round(n)).toLocaleString('en-US')+' '+c}
+
+function render(){
+  document.getElementById('recent').innerHTML=tx.slice(0,5).map(t=>`<tr><td>${t.name}</td><td>${t.type}</td><td class="${t.amt>0?'income':(t.type==='Investment'?'neutral':'expense')}">${fmt(t.amt)}</td></tr>`).join('');
+  document.getElementById('all').innerHTML=tx.map(t=>`<tr><td>${t.name}</td><td>${t.type}</td><td>${t.cat}</td><td class="${t.amt>0?'income':(t.type==='Investment'?'neutral':'expense')}">${fmt(t.amt)}</td></tr>`).join('');
+}
+function show(id,btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active')); if(btn) btn.classList.add('active');
+  const m={dashboard:'Dashboard',transactions:'Transactions',networth:'Net worth',projection:'Projection',scenarios:'Scenarios',goals:'Goals',preferences:'Preferences'};
+  document.getElementById('pageTitle').textContent=m[id];
+}
+function addDemo(){tx.unshift({name:'Coffee + snack',type:'Expense',cat:'Food',amt:-42});render()}
+function addCustom(){
+  const name=document.getElementById('name').value||'New item';
+  const amt=Number(document.getElementById('amount').value||0);
+  const type=document.getElementById('type').value;
+  const cat=document.getElementById('cat').value;
+  tx.unshift({name,type,cat,amt:type==='Income'?Math.abs(amt):-Math.abs(amt)});
+  render();
+}
+function chart(btn,mode){
+  btn.parentElement.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));btn.classList.add('active');
+  const l=document.getElementById('line'),a=document.getElementById('area');
+  let d='M0,190 C90,170 150,155 210,150 C280,138 330,105 390,88 C470,66 530,45 620,26';
+  if(mode==='stress') d='M0,160 C90,168 150,156 220,160 C290,166 350,153 420,145 C500,139 560,132 620,122';
+  if(mode==='house') d='M0,150 C90,132 160,120 225,112 C275,108 320,180 390,166 C470,150 550,136 620,124';
+  l.setAttribute('d',d); a.setAttribute('d',d+' L620,230 L0,230 Z');
+}
+function calc(){
+ const inc=+document.getElementById('inc').value,exp=+document.getElementById('exp').value,inv=+document.getElementById('inv').value,evt=+document.getElementById('evt').value,E=5.23;
+ document.getElementById('incV').textContent=fmt(inc);document.getElementById('expV').textContent=fmt(exp);document.getElementById('invV').textContent=inv.toLocaleString('en-US')+' EUR';document.getElementById('evtV').textContent=evt.toLocaleString('en-US')+' EUR';
+ const monthly=inc-exp-inv*E;let c=0,rows='';
+ for(let i=1;i<=6;i++){let s=monthly;if(i===2)s-=evt*E;c+=s;rows+=`<tr><td>Month ${i}${i===2?' · event':''}</td><td>${fmt(s)}</td><td>${fmt(c)}</td></tr>`}
+ document.getElementById('monthly').textContent=fmt(monthly);document.getElementById('six').textContent=fmt(c);document.getElementById('scenarioRows').innerHTML=rows;
+}
+
+/* Wizard */
+function openWizard(){
+  currentStep=0;
+  document.getElementById('overlay').style.display='flex';
+  updateWizard();
+}
+function closeWizard(){document.getElementById('overlay').style.display='none'}
+function chooseCurrency(el){
+  document.querySelectorAll('[data-currency]').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  selectedCurrency=el.dataset.currency;
+  document.getElementById('dailyCurrency').value=selectedCurrency;
+}
+function nextStep(){
+  if(currentStep<3){currentStep++;updateWizard()}
+  else{savePreferences()}
+}
+function backStep(){
+  if(currentStep>0){currentStep--;updateWizard()}
+}
+function updateWizard(){
+  document.querySelectorAll('.wizStep').forEach((s,i)=>s.classList.toggle('active',i===currentStep));
+  document.querySelectorAll('.stepDot').forEach((d,i)=>d.classList.toggle('active',i<=currentStep));
+  document.getElementById('backBtn').style.visibility=currentStep===0?'hidden':'visible';
+  document.getElementById('nextBtn').textContent=currentStep===3?'Save preferences':'Next';
+  if(currentStep===3) updateSummary();
+}
+function updateSummary(){
+  const daily=Number(document.getElementById('dailyAllowance').value||0);
+  const dailyCur=document.getElementById('dailyCurrency').value;
+  const burn=Number(document.getElementById('baselineBurn').value||0);
+  const horizon=document.getElementById('projectionHorizon').value;
+  document.getElementById('sumCurrency').textContent=selectedCurrency;
+  document.getElementById('sumDaily').textContent=`${daily.toLocaleString('en-US')} ${dailyCur}/day`;
+  document.getElementById('sumBurn').textContent=`${burn.toLocaleString('en-US')} ${selectedCurrency}`;
+  document.getElementById('sumHorizon').textContent=`${horizon} months`;
+}
+function savePreferences(){
+  const daily=Number(document.getElementById('dailyAllowance').value||0);
+  const dailyCur=document.getElementById('dailyCurrency').value;
+  const burn=Number(document.getElementById('baselineBurn').value||0);
+  const horizon=document.getElementById('projectionHorizon').value;
+  document.getElementById('dailyMetric').textContent=`${daily.toLocaleString('en-US')} ${dailyCur}`;
+  document.getElementById('horizonMetric').textContent=`${horizon} mo`;
+  document.getElementById('burnMetric').textContent=`${burn.toLocaleString('en-US')} ${selectedCurrency}`;
+  document.getElementById('ruleInsight').textContent=`${daily.toLocaleString('en-US')} ${dailyCur}/day is deducted automatically without detailed tracking.`;
+  document.getElementById('prefCurrency').textContent=selectedCurrency;
+  document.getElementById('prefDaily').textContent=`${daily.toLocaleString('en-US')} ${dailyCur}/day`;
+  document.getElementById('prefHorizon').textContent=`${horizon} months`;
+  document.getElementById('prefBurn').textContent=`${burn.toLocaleString('en-US')} ${selectedCurrency}`;
+  closeWizard();
+}
+
+render();calc();
+setTimeout(openWizard, 350);
+</script>
+</body>
+</html>
