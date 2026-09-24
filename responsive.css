@@ -1,0 +1,50 @@
+/* Responsive layout overrides; account data and navigation behavior are unchanged. */
+.card,.metrics>*,.row>*,.grid>*,.scenario>*{min-width:0}
+.card svg{display:block;max-width:100%;height:auto}
+.tableScroll{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+@media(max-width:950px){
+  .app{display:block}
+  .app aside{display:block;padding:8px 12px}
+  .app aside .brand,.app aside .sideNote{display:none}
+  .app nav{display:flex;gap:6px;overflow-x:auto;padding:4px 0;scrollbar-width:thin}
+  .app .nav{flex-shrink:0;white-space:nowrap;min-height:44px}
+  .app header{position:static;height:auto;min-height:0;padding:16px;display:block}
+  .app .actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .app .content{padding:14px;overflow:visible}
+  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid,.row,.scenario{grid-template-columns:minmax(0,1fr)}
+  .formGrid,.prefGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .choiceGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .overlay .wizard{overflow:hidden;max-height:90vh;max-height:90dvh}
+}
+@media(max-width:600px){
+  .app .content{padding:12px}
+  .card{padding:16px;border-radius:16px}
+  .metrics,.formGrid,.prefGrid,.ruleRow{grid-template-columns:minmax(0,1fr)}
+  .app .actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}
+  .actions .cta{min-width:0;padding:10px 8px;font-size:14px}
+  .actions .accountEmail{grid-column:1/-1;grid-row:3;max-width:100%;white-space:normal;overflow-wrap:anywhere}
+  button,input,select{min-height:44px}
+  input,select{font-size:16px;min-width:0}
+  .textButton{min-height:44px;padding:8px 4px}
+  .metric{font-size:30px;overflow-wrap:anywhere}
+  .demoNotice{padding:10px 14px}
+  .tabs{flex-wrap:wrap}
+  .controlTop{flex-wrap:wrap;gap:6px}
+  .summaryRow strong{text-align:right}
+  .overlay{padding:8px}
+  .overlay .wizard{max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px);border-radius:18px}
+  .wizTop,.wizBody{padding:16px}
+  .wizTop h2{font-size:20px}
+  .wizFooter{padding:12px;gap:8px;align-items:center}
+  .wizFooter .cta{padding:10px;font-size:14px}
+  #wizardStatus{margin:0;padding:0 16px!important}
+  .nwColumns{grid-template-columns:minmax(0,1fr);gap:12px}
+  .nwRow{grid-template-columns:minmax(0,1fr) 105px}
+  .authScreen{padding:16px;min-height:100dvh}
+  .authCard{padding:22px;width:100%;min-width:0}
+  .transactionActions{white-space:normal;min-width:90px}
+  .transactionActions button{margin-left:0;display:block}
+  #transactions table{min-width:460px}
+  #projection table{min-width:540px}
+}

@@ -99,6 +99,7 @@ input[type=range]{accent-color:var(--blue);padding:0}
 .summaryRow{gap:12px;overflow-wrap:anywhere}
 #netWorthMetric{font-size:clamp(24px,3vw,38px);overflow-wrap:anywhere}
 @media(max-width:600px){.nwColumns{grid-template-columns:1fr}}</style>
+<link rel="stylesheet" href="responsive.css?v=7da8f70cdc49">
 </head>
 <body>
 <noscript>FinTrack requires JavaScript to sign in and load your settings.</noscript>
@@ -195,10 +196,10 @@ input[type=range]{accent-color:var(--blue);padding:0}
 
             <div class="card">
               <h2>Recent activity</h2>
-              <table>
+              <div class="tableScroll" role="region" aria-label="Scrollable financial table" tabindex="0"><table>
                 <thead><tr><th>Item</th><th>Type</th><th>Amount</th></tr></thead>
                 <tbody id="recent"></tbody>
-              </table>
+              </table></div>
             </div>
           </div>
 
@@ -238,7 +239,7 @@ input[type=range]{accent-color:var(--blue);padding:0}
         </div>
         <div class="card" style="margin-top:14px">
           <h2>All transactions</h2><p id="deleteNotice" class="status" role="status"></p><button type="button" class="textButton" id="undoTransaction" onclick="undoTransactionDelete()" hidden>Undo last deletion</button>
-          <table><thead><tr><th>Item</th><th>Type</th><th>Category</th><th>Amount</th><th>Actions</th></tr></thead><tbody id="all"></tbody></table>
+          <div class="tableScroll" role="region" aria-label="Scrollable financial table" tabindex="0"><table><thead><tr><th>Item</th><th>Type</th><th>Category</th><th>Amount</th><th>Actions</th></tr></thead><tbody id="all"></tbody></table></div>
         </div>
       </section>
 
@@ -247,8 +248,8 @@ input[type=range]{accent-color:var(--blue);padding:0}
       <section id="projection" class="view">
         <div class="card">
           <h2>Future balance timeline <span class="demoBadge">Demo</span></h2>
-          <table><thead><tr><th>Month</th><th>Cash</th><th>Investments</th><th>Net worth est.</th><th>Event</th></tr></thead>
-          <tbody><tr><td>Sep</td><td>€22k</td><td>$80k</td><td>$742k</td><td>Normal month</td></tr><tr><td>Oct</td><td>€27k</td><td>$83k</td><td>$750k</td><td>DCA</td></tr><tr><td>Nov</td><td>€35k</td><td>$100k+</td><td>$760k+</td><td>Consolidation</td></tr><tr><td>Dec</td><td>€50k+</td><td>$100k–130k</td><td>$765k+</td><td>UI payout</td></tr><tr><td>Jan</td><td>depends</td><td>$100k+ untouched</td><td>depends</td><td>Next job / house decision</td></tr></tbody></table>
+          <div class="tableScroll" role="region" aria-label="Scrollable financial table" tabindex="0"><table><thead><tr><th>Month</th><th>Cash</th><th>Investments</th><th>Net worth est.</th><th>Event</th></tr></thead>
+          <tbody><tr><td>Sep</td><td>€22k</td><td>$80k</td><td>$742k</td><td>Normal month</td></tr><tr><td>Oct</td><td>€27k</td><td>$83k</td><td>$750k</td><td>DCA</td></tr><tr><td>Nov</td><td>€35k</td><td>$100k+</td><td>$760k+</td><td>Consolidation</td></tr><tr><td>Dec</td><td>€50k+</td><td>$100k–130k</td><td>$765k+</td><td>UI payout</td></tr><tr><td>Jan</td><td>depends</td><td>$100k+ untouched</td><td>depends</td><td>Next job / house decision</td></tr></tbody></table></div>
         </div>
       </section>
 
@@ -267,7 +268,7 @@ input[type=range]{accent-color:var(--blue);padding:0}
               <div class="card" style="box-shadow:none;background:#f8fafc"><div class="kicker">Monthly surplus</div><div class="metric" id="monthly">—</div></div>
               <div class="card" style="box-shadow:none;background:#f8fafc"><div class="kicker">6m change</div><div class="metric" id="six">—</div></div>
             </div>
-            <table><thead><tr><th>Month</th><th>Surplus</th><th>Cumulative</th></tr></thead><tbody id="scenarioRows"></tbody></table>
+            <div class="tableScroll" role="region" aria-label="Scrollable financial table" tabindex="0"><table><thead><tr><th>Month</th><th>Surplus</th><th>Cumulative</th></tr></thead><tbody id="scenarioRows"></tbody></table></div>
           </div>
         </div>
       </section>

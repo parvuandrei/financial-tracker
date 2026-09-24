@@ -106,3 +106,5 @@ Run `supabase/net-worth.sql` once before deploying (already applied for this pro
 Category reference: https://www.ramseysolutions.com/retirement/net-worth-calculator
 
 Browser QA: `node scripts/preview-test.cjs` serves the actual app against an isolated in-memory account service at http://127.0.0.1:4174. Use `/?new=1` for first-time setup. This test service never connects to Supabase and is not loaded by the deployed app. Automated tests include unique IDs, independent visible navigation views, account separation, refresh/re-login, save failures, custom items and validation.
+
+Phone layout: responsive.css stacks cards and forms, keeps horizontally scrollable navigation, contains wide tables, and keeps wizard navigation outside its scrolling body. With the isolated QA server running, open /scripts/phone-preview.html for 320px and 390px browser previews.
