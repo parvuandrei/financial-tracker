@@ -61,3 +61,12 @@ input[type=range]{accent-color:#a86d00}
   .app aside{padding-top:12px}
 }
 @media(prefers-reduced-motion:reduce){.nav{transition:none}}
+.languageChoice{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.languageChoice select{width:76px;min-height:44px;padding:8px;font-size:14px}
+.authCard .languageChoice{justify-content:flex-end;margin:0 0 12px}
+#preferences .languageChoice{margin-bottom:16px}
+@media(max-width:600px){.actions .languageChoice{grid-column:1/-1}.actions .accountEmail{grid-row:auto}.wizFooter>div{flex-wrap:wrap;justify-content:flex-end}.wizFooter .cta{max-width:180px}.summaryRow{flex-wrap:wrap}}
+@media(min-width:951px) and (max-width:1250px){
+ .app header{height:auto;min-height:68px;flex-wrap:wrap;gap:12px;padding:14px 24px}
+ .app .actions{flex-wrap:wrap;gap:8px}
+}

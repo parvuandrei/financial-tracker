@@ -1,7 +1,7 @@
 (function (root) {
   'use strict';
   function defaults() {
-    return { transactions: [], scenario: { inc: 31500, exp: 15000, inv: 1200, evt: 2500 },
+    return { language: null, transactions: [], scenario: { inc: 31500, exp: 15000, inv: 1200, evt: 2500 },
       chart: 'base', view: 'dashboard', draft: { name: '', amount: '', type: 'Expense', cat: 'Food' } };
   }
   const types = ['Expense', 'Income', 'Investment', 'Transfer', 'One-off'];
@@ -9,6 +9,7 @@
   function validate(value) {
     if (!value || !Array.isArray(value.transactions) || !value.scenario || !value.draft)
       throw new Error('Invalid account data.');
+    if(value.language!=null&&!['en','ro'].includes(value.language))throw new Error('Invalid language.');
     const transactions = value.transactions.map(t => {
       if (!t || typeof t.id !== 'string' || !t.id || typeof t.name !== 'string'
         || !t.name.trim() || t.name.length > 200 || !types.includes(t.type)
@@ -30,7 +31,7 @@
     if (typeof d.name !== 'string' || d.name.length > 200 || typeof d.amount !== 'string'
       || d.amount.length > 100 || !types.includes(d.type) || !categories.includes(d.cat))
       throw new Error('Invalid transaction draft.');
-    return { transactions, scenario, chart: value.chart, view: value.view,
+    return { language: value.language || null, transactions, scenario, chart: value.chart, view: value.view,
       draft: { name: d.name, amount: d.amount, type: d.type, cat: d.cat,
         editId: typeof d.editId==='string' && transactions.some(t=>t.id===d.editId) ? d.editId : null } };
   }

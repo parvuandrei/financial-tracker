@@ -113,3 +113,9 @@ Phone layout: responsive.css stacks cards and forms, keeps horizontally scrollab
 The interface uses golden yellow (#F5BC35), midnight navy (#132238), and warm ivory (#FAF8F2). branding.css applies the visual theme after the responsive stylesheet. assets/cashcaval-mark.svg is the scalable cheese/pie-chart mark; assets/cashcaval-icon.svg is the browser icon. Internal FinTrack JavaScript interfaces stay stable for compatibility. Version checks cover SVG assets as well as scripts and styles.
 
 Branding verified across all seven screens, with sign-in and wizard visual checks at 320px and 390px. No database migration is required.
+
+## English / Romanian
+
+Choose EN or RO on sign-in, in the header or in Preferences. The initial choice follows the browser language unless explicitly remembered on this browser. Signed-in accounts restore their saved choice from user_app_state.state.language, using the existing revision-protected save mechanism. No SQL migration is required; existing rows without language remain valid. Finishing first-time setup saves the initial language as well.
+
+translations.js contains the Romanian dictionary; English UI strings are the source keys. i18n.js registers static interface text once and tracks explicit dynamic interface writes. User-generated text is not scanned or translated. Option values and navigation IDs remain language-independent. Numeric display uses Intl locales; stored amounts, currencies, custom asset names and transaction descriptions are unchanged. Browser-native validation messages and external Google/Supabase email pages follow their own language settings.

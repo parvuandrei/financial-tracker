@@ -83,8 +83,10 @@ function harness(t, options = {}) {
   };
   w.FINTRACK_CONFIG = options.unconfigured ? {} : { supabaseUrl: 'https://testing.supabase.co', supabasePublishableKey: 'sb_publishable_test' };
   w.supabase = { createClient: () => client };
+  if(options.browserLanguage)Object.defineProperty(w.navigator,'language',{value:options.browserLanguage});
+  if(options.localLanguage)w.localStorage.setItem('cashcaval-language',options.localLanguage);
   const run=code=>vm.runInContext(code,dom.getInternalVMContext());
-  for (const file of ['net-worth.js','net-worth-ui.js','preferences.js', 'settings-store.js', 'app-state.js','transaction-tools.js']) run(read(file));
+  for (const file of ['translations.js','i18n.js','net-worth.js','net-worth-ui.js','preferences.js', 'settings-store.js', 'app-state.js','transaction-tools.js']) run(read(file));
   for (const script of w.document.querySelectorAll('script:not([src])')) run(script.textContent);
   run(read('account-data.js'));
   run(read('accounts.js'));
@@ -451,4 +453,35 @@ test('first-time wizard includes calculator and preserves its currency when base
 });
 test('net worth validates empty sides, invalid amounts and exact cents',()=>{
  const nw=require('../net-worth.js');const n={currency:'RON',assets:[{id:'1',name:'Cash',amount:0.1},{id:'2',name:'Savings',amount:0.2}],liabilities:[{id:'3',name:'Debt',amount:0.4}]};assert.deepEqual(nw.totals(n),{assets:0.3,liabilities:0.4,netWorth:-0.1});assert.equal(nw.totals({currency:'EUR',assets:[],liabilities:[]}).netWorth,0);for(const amount of [-1,NaN,Infinity,1e11])assert.throws(()=>nw.validate({...n,assets:[{id:'1',name:'Cash',amount}]}));
+});
+
+function switchLanguage(h,lang,id='headerLanguage'){h.$(id).value=lang;h.$(id).dispatchEvent(new h.w.Event('change',{bubbles:true}));}
+test('Romanian labels and formatting leave saved transaction identifiers and names intact',async t=>{
+ const h=harness(t,{user:alice,db:new Map([[alice.id,row(alice)]])});await flush();h.$('name').value='Income';h.$('amount').value='1234.50';h.w.addCustom();await h.w.FinTrackData.flush();switchLanguage(h,'ro');await h.w.FinTrackData.flush();
+ assert.equal(h.w.document.documentElement.lang,'ro');assert.equal(h.$('transactionBalance').textContent,'-1.234,50 RON');assert.equal(h.$('all').querySelector('td').textContent,'Income');assert.match(h.$('all').textContent,/Cheltuială/);assert.match(h.$('all').textContent,/Mâncare/);assert.equal(h.$('type').value,'Expense');assert.equal(h.$('cat').value,'Food');assert.equal(h.appDb.get(alice.id).state.transactions[0].name,'Income');assert.equal(h.appDb.get(alice.id).state.transactions[0].type,'Expense');
+ for(const id of ['dashboard','transactions','networth','projection','scenarios','goals','preferences']){h.w.show(id);assert.equal(h.w.document.querySelector('.nav.active').dataset.view,id);}
+ switchLanguage(h,'en');await h.w.FinTrackData.flush();assert.equal(h.$('transactionBalance').textContent,'-1,234.50 RON');assert.equal(h.$('type').value,'Expense');
+});
+test('language restores across devices and follows each saved account',async t=>{
+ const h=harness(t,{user:alice,db:new Map([[alice.id,row(alice)],[bob.id,row(bob)]])});await flush();switchLanguage(h,'ro');await h.w.FinTrackData.flush();assert.equal(h.appDb.get(alice.id).state.language,'ro');
+ const fresh=harness(t,{user:alice,db:h.db,appDb:h.appDb,localLanguage:'en'});await flush();assert.equal(fresh.w.I18n.language,'ro');assert.equal(fresh.$('headerLanguage').value,'ro');
+ h.emit('SIGNED_IN',bob);await flush();switchLanguage(h,'en');await h.w.FinTrackData.flush();h.emit('SIGNED_IN',alice);await flush();assert.equal(h.w.I18n.language,'ro');assert.equal(h.$('headerLanguage').value,'ro');
+});
+test('language uses browser default and remembered choice before authentication',async t=>{
+ const ro=harness(t,{browserLanguage:'ro-RO'});await flush();assert.equal(ro.$('authTitle').textContent,'Bine ai revenit');assert.equal(ro.$('authLanguage').value,'ro');switchLanguage(ro,'en','authLanguage');assert.equal(ro.$('authTitle').textContent,'Welcome back');assert.equal(ro.w.localStorage.getItem('cashcaval-language'),'en');
+ const en=harness(t,{browserLanguage:'ro-RO',localLanguage:'en'});await flush();assert.equal(en.w.I18n.language,'en');
+});
+test('language switch preserves wizard drafts and custom asset names',async t=>{
+ const h=harness(t,{user:alice});await flush();h.w.openWizard(1);const input=h.$('nw-assets').querySelector('[data-field="name"]');input.value='Cash';h.$('nw-assets').querySelector('[data-field="amount"]').value='1234.50';switchLanguage(h,'ro');assert.equal(input.value,'Cash');assert.equal(h.$('nwTotal').textContent,'1.234,50 RON');assert.equal(h.$('netWorthCurrency').value,'RON');await h.w.savePreferences();assert.equal(h.db.get(alice.id).net_worth.assets[0].name,'Cash');assert.equal(h.$('saved-assets').querySelector('span').textContent,'Cash');
+});
+test('language save failure remains visible and blocks logout until retried',async t=>{
+ const h=harness(t,{user:alice,db:new Map([[alice.id,row(alice)]])});await flush();h.state.failDataSave=true;switchLanguage(h,'ro');await flush();assert.match(h.$('dataStatus').textContent,/Salvarea nu a putut/);h.$('signOutBtn').click();await flush();assert.equal(h.w.FinTrackAccount.isReady(),true);h.state.failDataSave=false;await h.w.FinTrackData.flush();assert.equal(h.appDb.get(alice.id).state.language,'ro');
+});
+
+test('pre-login language choice syncs without marking first-time settings complete',async t=>{
+ const h=harness(t);await flush();switchLanguage(h,'ro','authLanguage');await h.submit(alice.email);await h.w.FinTrackData.flush();assert.equal(h.appDb.get(alice.id).state.language,'ro');assert.equal(h.db.has(alice.id),false);assert.equal(h.$('overlay').style.display,'flex');
+ const fresh=harness(t,{user:alice,db:h.db,appDb:h.appDb,localLanguage:'en'});await flush();assert.equal(fresh.w.I18n.language,'ro');assert.equal(fresh.$('overlay').style.display,'flex');
+});
+test('first-time setup saves browser language with account data',async t=>{
+ const h=harness(t,{user:alice,browserLanguage:'ro-RO'});await flush();await h.w.savePreferences();await h.w.FinTrackData.flush();assert.equal(h.appDb.get(alice.id).state.language,'ro');
 });

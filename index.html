@@ -103,12 +103,13 @@ input[type=range]{accent-color:var(--blue);padding:0}
 #netWorthMetric{font-size:clamp(24px,3vw,38px);overflow-wrap:anywhere}
 @media(max-width:600px){.nwColumns{grid-template-columns:1fr}}</style>
 <link rel="stylesheet" href="responsive.css?v=7da8f70cdc49">
-<link rel="stylesheet" href="branding.css?v=6823e7adb932">
+<link rel="stylesheet" href="branding.css?v=9bed62356a60">
 </head>
 <body>
 <noscript>Cashcaval requires JavaScript to sign in and load your settings.</noscript>
 <section class="authScreen" id="authScreen" aria-label="Account access">
   <div class="card authCard">
+<label class="languageChoice" for="authLanguage"><span>Language</span><select id="authLanguage" data-language aria-label="Language"><option value="en">EN</option><option value="ro">RO</option></select></label>
     <div class="authBrand"><img class="logo" src="assets/cashcaval-mark.svg?v=e56fa0bcb5b9" alt="" width="48" height="48">cashcaval</div>
     <p class="authTagline">Your whole wealth. One place.</p>
     <h1 id="authTitle">Welcome back</h1>
@@ -137,13 +138,13 @@ input[type=range]{accent-color:var(--blue);padding:0}
   <aside>
     <div class="brand" aria-label="Cashcaval"><img class="logo" src="assets/cashcaval-mark.svg?v=e56fa0bcb5b9" alt="" width="42" height="42">cashcaval</div>
     <nav>
-      <button class="nav active" onclick="show('dashboard',this)">Dashboard</button>
-      <button class="nav" onclick="show('transactions',this)">Transactions</button>
-      <button class="nav" onclick="show('networth',this)">Net worth</button>
-      <button class="nav" onclick="show('projection',this)">Projection</button>
-      <button class="nav" onclick="show('scenarios',this)">Scenarios</button>
-      <button class="nav" onclick="show('goals',this)">Goals</button>
-      <button class="nav" onclick="show('preferences',this)">Preferences</button>
+      <button class="nav active" data-view="dashboard" onclick="show('dashboard',this)">Dashboard</button>
+      <button class="nav" data-view="transactions" onclick="show('transactions',this)">Transactions</button>
+      <button class="nav" data-view="networth" onclick="show('networth',this)">Net worth</button>
+      <button class="nav" data-view="projection" onclick="show('projection',this)">Projection</button>
+      <button class="nav" data-view="scenarios" onclick="show('scenarios',this)">Scenarios</button>
+      <button class="nav" data-view="goals" onclick="show('goals',this)">Goals</button>
+      <button class="nav" data-view="preferences" onclick="show('preferences',this)">Preferences</button>
     </nav>
     <div class="sideNote"><strong style="color:white">MVP mode</strong><br>Manual-first. No bank sync. CSV/Excel export.</div>
   </aside>
@@ -152,6 +153,7 @@ input[type=range]{accent-color:var(--blue);padding:0}
     <header>
       <div class="title" id="pageTitle">Dashboard</div>
       <div class="actions">
+<label class="languageChoice" for="headerLanguage"><span>Language</span><select id="headerLanguage" data-language aria-label="Language"><option value="en">EN</option><option value="ro">RO</option></select></label>
         <button class="cta secondary" onclick="openWizard()">Setup wizard</button>
         <button class="cta secondary" onclick="if(editingId)cancelTransactionEdit();show('transactions');document.getElementById('name').focus()">+ Transaction</button>
         <button class="cta" onclick="show('scenarios')">Run scenario</button>
@@ -288,6 +290,7 @@ input[type=range]{accent-color:var(--blue);padding:0}
       <section id="preferences" class="view">
         <div class="card">
           <h2>User preferences</h2>
+<label class="languageChoice" for="preferencesLanguage"><span>Language</span><select id="preferencesLanguage" data-language aria-label="Language"><option value="en">EN</option><option value="ro">RO</option></select></label>
           <p class="status" id="settingsStatus" role="status" aria-live="polite"></p>
           <div class="prefGrid">
             <div class="prefItem"><strong>Base currency</strong><span id="prefCurrency">RON</span></div>
@@ -426,12 +429,14 @@ input[type=range]{accent-color:var(--blue);padding:0}
 
 <script src="vendor/supabase.js?v=dff1e545f4f3"></script>
 <script src="config.js?v=eda093a762c5"></script>
+<script src="translations.js?v=bd76f6877300"></script>
+<script src="i18n.js?v=de8b812d25ed"></script>
 <script src="net-worth.js?v=e677194d3f81"></script>
-<script src="net-worth-ui.js?v=6e057385aad1"></script>
+<script src="net-worth-ui.js?v=fa4e2f454a81"></script>
 <script src="preferences.js?v=e79be5937754"></script>
 <script src="settings-store.js?v=7c4da30b17d8"></script>
-<script src="app-state.js?v=da65f2cf5b87"></script>
-<script src="transaction-tools.js?v=e8486f77fdbd"></script>
+<script src="app-state.js?v=26163a5c5d87"></script>
+<script src="transaction-tools.js?v=469a969817da"></script>
 <script>
 const tx=[];
 let currentChart='base';
@@ -444,7 +449,7 @@ let savingPreferences=false;
 let preferenceSaveVersion=0;
 let wizardOpener=null;
 
-function fmt(n,c='RON'){return (n<0?'-':'')+Math.abs(Math.round(n)).toLocaleString('en-US')+' '+c}
+function fmt(n,c='RON'){return (n<0?'-':'')+Math.abs(Math.round(n)).toLocaleString(I18n.locale())+' '+c}
 function escapeText(value){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 
 function render(){renderTransactions();}
@@ -452,9 +457,9 @@ function show(id,btn){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); document.getElementById(id).classList.add('active');
   document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active')); if(btn) btn.classList.add('active');
   const m={dashboard:'Dashboard',transactions:'Transactions',networth:'Net worth',projection:'Projection',scenarios:'Scenarios',goals:'Goals',preferences:'Preferences'};
-  document.getElementById('pageTitle').textContent=m[id];
+  I18n.write(document.getElementById('pageTitle'),m[id]);
   currentView=id;
-  document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.textContent===m[id]));
+  document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.view===id));
   window.FinTrackData?.changed();
 }
 function addCustom(){
@@ -464,13 +469,13 @@ function addCustom(){
   const type=document.getElementById('type').value;
   const cat=document.getElementById('cat').value;
   if(!name || name.length>200 || !Number.isFinite(amt) || amt===0){
-    document.getElementById('transactionStatus').textContent='Enter a description and a valid non-zero amount.';return;
+    I18n.write(document.getElementById('transactionStatus'),'Enter a description and a valid non-zero amount.');return;
   }
   const item={id:editingId||crypto.randomUUID(),name,type,cat,amt:type==='Income'?Math.abs(amt):-Math.abs(amt)};
   if(editingId){const index=tx.findIndex(t=>t.id===editingId);if(index<0)return;tx[index]=item;}else tx.unshift(item);
   editingId=null;updateTransactionEditor();
   document.getElementById('name').value='';document.getElementById('amount').value='';
-  document.getElementById('transactionStatus').textContent='';
+  I18n.write(document.getElementById('transactionStatus'),'');
   render();
   window.FinTrackData?.changed();
   void window.FinTrackData?.flush().catch(()=>{});
@@ -487,10 +492,10 @@ function chart(btn,mode){
 }
 function calc(){
  const inc=+document.getElementById('inc').value,exp=+document.getElementById('exp').value,inv=+document.getElementById('inv').value,evt=+document.getElementById('evt').value,E=5.23;
- document.getElementById('incV').textContent=fmt(inc);document.getElementById('expV').textContent=fmt(exp);document.getElementById('invV').textContent=inv.toLocaleString('en-US')+' EUR';document.getElementById('evtV').textContent=evt.toLocaleString('en-US')+' EUR';
+ I18n.write(document.getElementById('incV'),fmt(inc));I18n.write(document.getElementById('expV'),fmt(exp));I18n.write(document.getElementById('invV'),inv.toLocaleString(I18n.locale())+' EUR');I18n.write(document.getElementById('evtV'),evt.toLocaleString(I18n.locale())+' EUR');
  const monthly=inc-exp-inv*E;let c=0,rows='';
- for(let i=1;i<=6;i++){let s=monthly;if(i===2)s-=evt*E;c+=s;rows+=`<tr><td>Month ${i}${i===2?' · event':''}</td><td>${fmt(s)}</td><td>${fmt(c)}</td></tr>`}
- document.getElementById('monthly').textContent=fmt(monthly);document.getElementById('six').textContent=fmt(c);document.getElementById('scenarioRows').innerHTML=rows;
+ for(let i=1;i<=6;i++){let s=monthly;if(i===2)s-=evt*E;c+=s;rows+=`<tr><td>${I18n.t(`Month ${i}${i===2?' · event':''}`)}</td><td>${fmt(s)}</td><td>${fmt(c)}</td></tr>`}
+ I18n.write(document.getElementById('monthly'),fmt(monthly));I18n.write(document.getElementById('six'),fmt(c));document.getElementById('scenarioRows').innerHTML=rows;
 }
 
 /* Wizard */
@@ -498,7 +503,7 @@ function openWizard(startAt=0){
   if(!window.FinTrackAccount?.isReady() || savingPreferences) return;
   wizardOpener=document.activeElement;
   fillWizard(savedPreferences);
-  document.getElementById('wizardStatus').textContent='';
+  I18n.write(document.getElementById('wizardStatus'),'');
   currentStep=startAt;
   document.getElementById('overlay').style.display='flex';
   document.getElementById('app').inert=true;
@@ -538,12 +543,12 @@ function nextStep(){
   if(savingPreferences) return;
   for(const input of document.querySelectorAll('.wizStep.active input')){
     if(input.value.trim()==='' || !input.reportValidity()){
-      document.getElementById('wizardStatus').textContent='Give each item a name and enter valid non-negative amounts.';
+      I18n.write(document.getElementById('wizardStatus'),'Give each item a name and enter valid non-negative amounts.');
       input.focus();return;
     }
   }
-  if(currentStep===1){try{readNetWorthWizard();}catch(error){document.getElementById('wizardStatus').textContent=error.message;return;}}
-  document.getElementById('wizardStatus').textContent='';
+  if(currentStep===1){try{readNetWorthWizard();}catch(error){I18n.write(document.getElementById('wizardStatus'),error.message);return;}}
+  I18n.write(document.getElementById('wizardStatus'),'');
   if(currentStep<4){currentStep++;updateWizard()}
   else{savePreferences()}
 }
@@ -556,7 +561,7 @@ function updateWizard(){
   document.querySelectorAll('.wizStep').forEach((s,i)=>s.classList.toggle('active',i===currentStep));
   document.querySelectorAll('.stepDot').forEach((d,i)=>d.classList.toggle('active',i<=currentStep));
   document.getElementById('backBtn').style.visibility=currentStep===0?'hidden':'visible';
-  document.getElementById('nextBtn').textContent=currentStep===4?'Save preferences':'Next';
+  I18n.write(document.getElementById('nextBtn'),currentStep===4?'Save preferences':'Next');
   if(currentStep===4) updateSummary();
 }
 function updateSummary(){
@@ -565,24 +570,24 @@ function updateSummary(){
   const burn=Number(document.getElementById('baselineBurn').value||0);
   const horizon=document.getElementById('projectionHorizon').value;
   const nw=readNetWorthWizard();
-  document.getElementById('sumNetWorth').textContent=netWorthMoney(FinTrackNetWorth.totals(nw).netWorth,nw.currency);
-  document.getElementById('sumCurrency').textContent=selectedCurrency;
-  document.getElementById('sumDaily').textContent=`${daily.toLocaleString('en-US')} ${dailyCur}/day`;
-  document.getElementById('sumBurn').textContent=`${burn.toLocaleString('en-US')} ${selectedCurrency}`;
-  document.getElementById('sumHorizon').textContent=`${horizon} months`;
+  I18n.write(document.getElementById('sumNetWorth'),netWorthMoney(FinTrackNetWorth.totals(nw).netWorth,nw.currency));
+  I18n.write(document.getElementById('sumCurrency'),selectedCurrency);
+  I18n.write(document.getElementById('sumDaily'),`${daily.toLocaleString(I18n.locale())} ${dailyCur}/day`);
+  I18n.write(document.getElementById('sumBurn'),`${burn.toLocaleString(I18n.locale())} ${selectedCurrency}`);
+  I18n.write(document.getElementById('sumHorizon'),`${horizon} months`);
 }
 function applyPreferences(value){
   savedPreferences=FinTrackPreferences.validate(value);
   renderSavedNetWorth(savedPreferences.netWorth);
   const {dailyAllowance:daily,dailyCurrency:dailyCur,baselineBurn:burn,horizon,currency}=savedPreferences;
-  document.getElementById('dailyMetric').textContent=`${daily.toLocaleString('en-US')} ${dailyCur}`;
-  document.getElementById('horizonMetric').textContent=`${horizon} mo`;
-  document.getElementById('burnMetric').textContent=`${burn.toLocaleString('en-US')} ${currency}`;
-  document.getElementById('ruleInsight').textContent=`${daily.toLocaleString('en-US')} ${dailyCur}/day is deducted automatically without detailed tracking.`;
-  document.getElementById('prefCurrency').textContent=currency;
-  document.getElementById('prefDaily').textContent=`${daily.toLocaleString('en-US')} ${dailyCur}/day`;
-  document.getElementById('prefHorizon').textContent=`${horizon} months`;
-  document.getElementById('prefBurn').textContent=`${burn.toLocaleString('en-US')} ${currency}`;
+  I18n.write(document.getElementById('dailyMetric'),`${daily.toLocaleString(I18n.locale())} ${dailyCur}`);
+  I18n.write(document.getElementById('horizonMetric'),`${horizon} mo`);
+  I18n.write(document.getElementById('burnMetric'),`${burn.toLocaleString(I18n.locale())} ${currency}`);
+  I18n.write(document.getElementById('ruleInsight'),`${daily.toLocaleString(I18n.locale())} ${dailyCur}/day is deducted automatically without detailed tracking.`);
+  I18n.write(document.getElementById('prefCurrency'),currency);
+  I18n.write(document.getElementById('prefDaily'),`${daily.toLocaleString(I18n.locale())} ${dailyCur}/day`);
+  I18n.write(document.getElementById('prefHorizon'),`${horizon} months`);
+  I18n.write(document.getElementById('prefBurn'),`${burn.toLocaleString(I18n.locale())} ${currency}`);
 }
 async function savePreferences(){
   if(savingPreferences || !window.FinTrackAccount?.isReady()) return;
@@ -597,17 +602,18 @@ async function savePreferences(){
     });
     savingPreferences=true;
     document.querySelectorAll('#overlay button,#overlay input,#overlay select').forEach(x=>x.disabled=true);
-    status.className='status';status.textContent='Saving your preferences…';
+    status.className='status';I18n.write(status,'Saving your preferences…');
     const saved=await FinTrackAccount.savePreferences(p);
     if(!saved || ticket!==preferenceSaveVersion) return;
     applyPreferences(saved);
-    document.getElementById('settingsStatus').textContent='Saved to your account.';
+    FinTrackData.changed();void FinTrackData.flush().catch(()=>{});
+    I18n.write(document.getElementById('settingsStatus'),'Saved to your account.');
     savingPreferences=false;
     closeWizard();
   }catch(error){
     if(ticket!==preferenceSaveVersion)return;
     status.className='status error';
-    status.textContent='Couldn’t confirm the save. Your edits are still here; check your connection and try again.';
+    I18n.write(status,'Couldn’t confirm the save. Your edits are still here; check your connection and try again.');
   }finally{
     if(ticket===preferenceSaveVersion){
       savingPreferences=false;
@@ -616,6 +622,12 @@ async function savePreferences(){
   }
 }
 
+function refreshLanguageUI(){
+  render();calc();applyPreferences(savedPreferences);
+  I18n.write(document.getElementById('pageTitle'),{dashboard:'Dashboard',transactions:'Transactions',networth:'Net worth',projection:'Projection',scenarios:'Scenarios',goals:'Goals',preferences:'Preferences'}[currentView]);
+  updateNetWorthPreview();
+  if(currentStep===4)updateSummary();
+}
 render();calc();
 function resetDashboard(){
   resetTransactionTools();
@@ -624,22 +636,23 @@ function resetDashboard(){
   document.querySelectorAll('#overlay button,#overlay input,#overlay select').forEach(x=>x.disabled=false);
   applyPreferences(FinTrackPreferences.defaults);fillWizard(savedPreferences);
   tx.splice(0,tx.length);
-  document.getElementById('transactionStatus').textContent='';
+  I18n.write(document.getElementById('transactionStatus'),'');
   document.getElementById('name').value='';document.getElementById('amount').value='';
   document.getElementById('type').selectedIndex=0;document.getElementById('cat').selectedIndex=0;
   for(const [id,value] of Object.entries({inc:31500,exp:15000,inv:1200,evt:2500}))document.getElementById(id).value=value;
   chart(document.querySelector('.tab'),'base');render();calc();
   show('dashboard',document.querySelector('.nav'));
-  document.getElementById('settingsStatus').textContent='';
+  I18n.write(document.getElementById('settingsStatus'),'');
 }
 function captureAccountState(){
-  return {transactions:tx.map(t=>({...t})),
+  return {language:I18n.language,transactions:tx.map(t=>({...t})),
     scenario:Object.fromEntries(['inc','exp','inv','evt'].map(id=>[id,Number(document.getElementById(id).value)])),
     chart:currentChart,view:currentView,
     draft:{...Object.fromEntries(['name','amount','type','cat'].map(id=>[id,document.getElementById(id).value])),editId:editingId}};
 }
 function applyAccountState(value){
   const state=FinTrackState.validate(value);
+  I18n.use(state.language||I18n.localLanguage(),false);
   tx.splice(0,tx.length,...state.transactions);
   for(const [id,value] of Object.entries(state.scenario))document.getElementById(id).value=value;
   for(const id of ['name','amount','type','cat'])document.getElementById(id).value=state.draft[id];
@@ -660,7 +673,7 @@ document.getElementById('overlay').addEventListener('keydown',event=>{
   else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}
 });
 </script>
-<script src="account-data.js?v=63ce6bc83700"></script>
-<script src="accounts.js?v=30cdadf9d46a"></script>
+<script src="account-data.js?v=d2c25932f7fa"></script>
+<script src="accounts.js?v=3030b6da56a7"></script>
 </body>
 </html>

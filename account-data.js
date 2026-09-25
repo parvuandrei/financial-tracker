@@ -3,16 +3,16 @@
   let store, owner = null, revision = 0, generation = 0, changes = 0, saved = 0;
   let timer = null, pending = null;
   const message = (text, failed = false) => {
-    document.getElementById('dataStatus').textContent = text;
+    I18n.write(document.getElementById('dataStatus'),text);
     document.getElementById('dataStatus').className = `status ${failed ? 'error' : ''}`;
     document.getElementById('retryData').hidden = !failed;
     const transactionStatus = document.getElementById('transactionStatus');
-    transactionStatus.textContent = text;
+    I18n.write(transactionStatus,text);
     transactionStatus.className = `status ${failed ? 'error' : ''}`;
     const button = document.getElementById('addTransactionBtn');
     const saving = text === 'Saving…';
     button.disabled = saving;
-    button.textContent = saving ? 'Saving…' : (editingId ? 'Save changes' : 'Add');
+    I18n.write(button,saving ? 'Saving…' : (editingId ? 'Save changes' : 'Add'));
     button.setAttribute('aria-busy', String(saving));
   };
   function clear() {
@@ -28,6 +28,7 @@
     applyAccountState(result.state);
     owner = userId;
     message('All changes saved');
+    return result.state.language;
   }
   function changed() {
     if (!owner) return;

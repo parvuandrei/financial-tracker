@@ -7,7 +7,7 @@
   let callbackError = [location.search.slice(1), location.hash.slice(1)]
     .some(part => new URLSearchParams(part).has('error'));
   const status = (message, kind = '') => {
-    $('authStatus').textContent = message;
+    I18n.write($('authStatus'),message);
     $('authStatus').className = `status ${kind}`;
   };
   function setBusy(value) {
@@ -20,11 +20,11 @@
   function showMode(next) {
     mode = next;
     const signup = mode === 'signup', reset = mode === 'reset', recovery = mode === 'recovery';
-    $('authTitle').textContent = signup ? 'Create your account' : reset ? 'Reset your password' : recovery ? 'Choose a new password' : 'Welcome back';
-    $('authDescription').textContent = signup ? 'Save your planning preferences and access them on any device.'
+    I18n.write($('authTitle'),signup ? 'Create your account' : reset ? 'Reset your password' : recovery ? 'Choose a new password' : 'Welcome back');
+    I18n.write($('authDescription'),signup ? 'Save your planning preferences and access them on any device.'
       : reset ? 'Enter your email to request a password reset link.'
-      : recovery ? 'Use a new password with at least 12 characters.' : 'Sign in to keep your planning preferences with you.';
-    $('authSubmit').textContent = signup ? 'Create account' : reset ? 'Send reset link' : recovery ? 'Save new password' : 'Sign in';
+      : recovery ? 'Use a new password with at least 12 characters.' : 'Sign in to keep your planning preferences with you.');
+    I18n.write($('authSubmit'),signup ? 'Create account' : reset ? 'Send reset link' : recovery ? 'Save new password' : 'Sign in');
     $('emailField').hidden = recovery;
     $('authEmail').required = !recovery;
     $('passwordField').hidden = reset;
@@ -36,7 +36,7 @@
     $('confirmField').hidden = !(signup || recovery);
     $('authConfirm').required = signup || recovery;
     $('passwordHint').hidden = !(signup || recovery);
-    $('authToggle').textContent = mode === 'login' ? 'Create an account' : 'Back to sign in';
+    I18n.write($('authToggle'),mode === 'login' ? 'Create an account' : 'Back to sign in');
     $('authForgot').hidden = mode !== 'login';
     $('authLinks').hidden = recovery;
     $('googleAccess').hidden = reset || recovery;
@@ -48,6 +48,7 @@
   function lockDashboard() {
     ready = false;
     FinTrackData.clear();
+    I18n.use(I18n.localLanguage(),false);
     $('app').hidden = true;
     $('authScreen').hidden = false;
     $('accountEmail').textContent = '';
@@ -61,24 +62,25 @@
     $('authLinks').hidden = true;
     $('retrySettings').hidden = true;
     $('authSignOut').hidden = false;
-    $('authTitle').textContent = 'Loading your account';
-    $('authDescription').textContent = 'Getting your transactions and saved settings ready.';
+    I18n.write($('authTitle'),'Loading your account');
+    I18n.write($('authDescription'),'Getting your transactions and saved settings ready.');
     status('Loading…');
     try {
-      const [preferences] = await Promise.all([store.load(owner.id), FinTrackData.load(owner.id)]);
+      const [preferences, savedLanguage] = await Promise.all([store.load(owner.id), FinTrackData.load(owner.id)]);
       if (ticket !== version || recovering) return;
       applyPreferences(preferences || FinTrackPreferences.defaults);
       ready = true;
+      if(!savedLanguage && I18n.hasLocalChoice()){FinTrackData.changed();void FinTrackData.flush().catch(()=>{});}
       $('accountEmail').textContent = owner.email || 'Signed in';
       $('accountEmail').title = owner.email || '';
       $('authScreen').hidden = true;
       $('app').hidden = false;
-      $('settingsStatus').textContent = preferences ? 'Loaded from your account.' : 'Default preferences — use the wizard to save your own.';
+      I18n.write($('settingsStatus'),preferences ? 'Loaded from your account.' : 'Default preferences — use the wizard to save your own.');
       if (!preferences) openWizard();
     } catch (error) {
       if (ticket !== version) return;
-      $('authTitle').textContent = 'Couldn’t load your account';
-      $('authDescription').textContent = 'Your saved preferences have not been changed.';
+      I18n.write($('authTitle'),'Couldn’t load your account');
+      I18n.write($('authDescription'),'Your saved preferences have not been changed.');
       status('Check your connection and try again. If this continues, the account service may need attention.', 'error');
       $('retrySettings').hidden = false;
     }
@@ -216,8 +218,8 @@
       showMode('login');
       status('You are signed out.', 'success');
     } catch (error) {
-      $('authTitle').textContent = 'Sign out didn’t finish';
-      $('authDescription').textContent = 'Your dashboard is hidden. Please try signing out again.';
+      I18n.write($('authTitle'),'Sign out didn’t finish');
+      I18n.write($('authDescription'),'Your dashboard is hidden. Please try signing out again.');
       $('authSignOut').hidden = false;
       status('Check your connection and try again.', 'error');
     } finally {
@@ -243,8 +245,8 @@
   try {
     const config = window.FINTRACK_CONFIG || {};
     if (!config.supabaseUrl || !config.supabasePublishableKey) {
-      $('authTitle').textContent = 'Accounts are coming soon';
-      $('authDescription').textContent = 'Cashcaval’s account service is being connected.';
+      I18n.write($('authTitle'),'Accounts are coming soon');
+      I18n.write($('authDescription'),'Cashcaval’s account service is being connected.');
       status('Please check back once setup is complete.');
       return;
     }
@@ -268,8 +270,8 @@
       if (error && !user) { showMode('login'); status('Your sign-in link or session expired. Sign in or request a new reset link.', 'error'); }
     }).catch(() => { showMode('login'); status('Couldn’t restore your session. Please sign in again.', 'error'); });
   } catch (error) {
-    $('authTitle').textContent = 'Accounts are temporarily unavailable';
-    $('authDescription').textContent = 'The account service could not start.';
+    I18n.write($('authTitle'),'Accounts are temporarily unavailable');
+    I18n.write($('authDescription'),'The account service could not start.');
     status('Please try again later.', 'error');
   }
 })();
