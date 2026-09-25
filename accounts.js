@@ -244,7 +244,7 @@
     const config = window.FINTRACK_CONFIG || {};
     if (!config.supabaseUrl || !config.supabasePublishableKey) {
       $('authTitle').textContent = 'Accounts are coming soon';
-      $('authDescription').textContent = 'FinTrack’s account service is being connected.';
+      $('authDescription').textContent = 'Cashcaval’s account service is being connected.';
       status('Please check back once setup is complete.');
       return;
     }

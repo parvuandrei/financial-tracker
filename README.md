@@ -1,4 +1,4 @@
-# FinTrack
+# Cashcaval
 
 A static personal-finance dashboard with Supabase email/password accounts and per-user preferences. The frontend can run on GitHub Pages without a build step.
 
@@ -108,3 +108,8 @@ Category reference: https://www.ramseysolutions.com/retirement/net-worth-calcula
 Browser QA: `node scripts/preview-test.cjs` serves the actual app against an isolated in-memory account service at http://127.0.0.1:4174. Use `/?new=1` for first-time setup. This test service never connects to Supabase and is not loaded by the deployed app. Automated tests include unique IDs, independent visible navigation views, account separation, refresh/re-login, save failures, custom items and validation.
 
 Phone layout: responsive.css stacks cards and forms, keeps horizontally scrollable navigation, contains wide tables, and keeps wizard navigation outside its scrolling body. With the isolated QA server running, open /scripts/phone-preview.html for 320px and 390px browser previews.
+
+## Cashcaval identity
+The interface uses golden yellow (#F5BC35), midnight navy (#132238), and warm ivory (#FAF8F2). branding.css applies the visual theme after the responsive stylesheet. assets/cashcaval-mark.svg is the scalable cheese/pie-chart mark; assets/cashcaval-icon.svg is the browser icon. Internal FinTrack JavaScript interfaces stay stable for compatibility. Version checks cover SVG assets as well as scripts and styles.
+
+Branding verified across all seven screens, with sign-in and wizard visual checks at 320px and 390px. No database migration is required.

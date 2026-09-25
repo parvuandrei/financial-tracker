@@ -5,7 +5,7 @@ const crypto = require('node:crypto');
 const root = path.resolve(__dirname, '..');
 const file = path.join(root, 'index.html');
 const original = fs.readFileSync(file, 'utf8');
-const versioned = original.replace(/(src|href)="([\w./-]+\.(?:js|css))(?:\?v=[\w-]+)?"/g, (_, attr, asset) => {
+const versioned = original.replace(/(src|href)="([\w./-]+\.(?:js|css|svg))(?:\?v=[\w-]+)?"/g, (_, attr, asset) => {
   const text = fs.readFileSync(path.join(root, asset), 'utf8').replace(/\r\n/g, '\n');
   const version = crypto.createHash('sha256').update(text).digest('hex').slice(0, 12);
   return `${attr}="${asset}?v=${version}"`;

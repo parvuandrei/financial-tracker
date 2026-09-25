@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>FinTrack</title>
+<title>Cashcaval — Your net worth, clearly</title>
+<meta name="theme-color" content="#132238">
+<meta name="description" content="Your whole wealth, one place. Track your net worth, assets, liabilities and everyday finances with Cashcaval.">
+<link rel="icon" type="image/svg+xml" href="assets/cashcaval-icon.svg?v=f5e7923fffb9">
 <meta name="referrer" content="no-referrer">
 <link rel="stylesheet" href="accounts.css?v=e48ce0eff358">
 <style>
@@ -100,12 +103,14 @@ input[type=range]{accent-color:var(--blue);padding:0}
 #netWorthMetric{font-size:clamp(24px,3vw,38px);overflow-wrap:anywhere}
 @media(max-width:600px){.nwColumns{grid-template-columns:1fr}}</style>
 <link rel="stylesheet" href="responsive.css?v=7da8f70cdc49">
+<link rel="stylesheet" href="branding.css?v=6823e7adb932">
 </head>
 <body>
-<noscript>FinTrack requires JavaScript to sign in and load your settings.</noscript>
+<noscript>Cashcaval requires JavaScript to sign in and load your settings.</noscript>
 <section class="authScreen" id="authScreen" aria-label="Account access">
   <div class="card authCard">
-    <div class="authBrand"><div class="logo">F</div>FinTrack</div>
+    <div class="authBrand"><img class="logo" src="assets/cashcaval-mark.svg?v=e56fa0bcb5b9" alt="" width="48" height="48">cashcaval</div>
+    <p class="authTagline">Your whole wealth. One place.</p>
     <h1 id="authTitle">Welcome back</h1>
     <p class="sub" id="authDescription">Sign in to keep your planning preferences with you.</p>
     <div id="googleAccess" hidden>
@@ -130,7 +135,7 @@ input[type=range]{accent-color:var(--blue);padding:0}
 </section>
 <div class="app" id="app" hidden>
   <aside>
-    <div class="brand"><div class="logo">F</div>FinTrack</div>
+    <div class="brand" aria-label="Cashcaval"><img class="logo" src="assets/cashcaval-mark.svg?v=e56fa0bcb5b9" alt="" width="42" height="42">cashcaval</div>
     <nav>
       <button class="nav active" onclick="show('dashboard',this)">Dashboard</button>
       <button class="nav" onclick="show('transactions',this)">Transactions</button>
@@ -177,9 +182,9 @@ input[type=range]{accent-color:var(--blue);padding:0}
                 <h2>Balance projection <span class="demoBadge">Demo</span></h2>
                 <div class="tabs"><button class="tab active" onclick="chart(this,'base')">Base</button><button class="tab" onclick="chart(this,'stress')">Stress</button><button class="tab" onclick="chart(this,'house')">House</button></div>
                 <svg viewBox="0 0 620 230">
-                  <defs><linearGradient id="a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2563eb" stop-opacity=".22"/><stop offset="1" stop-color="#2563eb" stop-opacity="0"/></linearGradient></defs>
+                  <defs><linearGradient id="a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F5BC35" stop-opacity=".22"/><stop offset="1" stop-color="#F5BC35" stop-opacity="0"/></linearGradient></defs>
                   <path id="area" d="M0,190 C90,170 150,155 210,150 C280,138 330,105 390,88 C470,66 530,45 620,26 L620,230 L0,230 Z" fill="url(#a)"/>
-                  <path id="line" d="M0,190 C90,170 150,155 210,150 C280,138 330,105 390,88 C470,66 530,45 620,26" fill="none" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
+                  <path id="line" d="M0,190 C90,170 150,155 210,150 C280,138 330,105 390,88 C470,66 530,45 620,26" fill="none" stroke="#d49a16" stroke-width="6" stroke-linecap="round"/>
                   <g fill="#6b7280" font-size="13" font-weight="700"><text x="0" y="220">Sep</text><text x="120" y="220">Oct</text><text x="240" y="220">Nov</text><text x="360" y="220">Dec</text><text x="480" y="220">Jan</text></g>
                 </svg>
               </div>
@@ -208,11 +213,11 @@ input[type=range]{accent-color:var(--blue);padding:0}
               <h2>Net worth mix <span class="demoBadge">Demo</span></h2>
               <svg viewBox="0 0 300 180">
                 <circle cx="95" cy="88" r="62" fill="none" stroke="#e5e7eb" stroke-width="26"/>
-                <circle cx="95" cy="88" r="62" fill="none" stroke="#2563eb" stroke-width="26" stroke-dasharray="246 390" transform="rotate(-90 95 88)"/>
-                <circle cx="95" cy="88" r="62" fill="none" stroke="#10b981" stroke-width="26" stroke-dasharray="70 390" stroke-dashoffset="-246" transform="rotate(-90 95 88)"/>
-                <circle cx="95" cy="88" r="62" fill="none" stroke="#f59e0b" stroke-width="26" stroke-dasharray="44 390" stroke-dashoffset="-316" transform="rotate(-90 95 88)"/>
+                <circle cx="95" cy="88" r="62" fill="none" stroke="#d49a16" stroke-width="26" stroke-dasharray="246 390" transform="rotate(-90 95 88)"/>
+                <circle cx="95" cy="88" r="62" fill="none" stroke="#243c59" stroke-width="26" stroke-dasharray="70 390" stroke-dashoffset="-246" transform="rotate(-90 95 88)"/>
+                <circle cx="95" cy="88" r="62" fill="none" stroke="#93aa9d" stroke-width="26" stroke-dasharray="44 390" stroke-dashoffset="-316" transform="rotate(-90 95 88)"/>
                 <text x="95" y="85" text-anchor="middle" font-size="22" font-weight="900">63%</text><text x="95" y="105" text-anchor="middle" font-size="11" fill="#6b7280">real estate</text>
-                <g font-size="12" fill="#374151" font-weight="800"><rect x="185" y="48" width="9" height="9" rx="2" fill="#2563eb"/><text x="202" y="57">Real estate</text><rect x="185" y="78" width="9" height="9" rx="2" fill="#10b981"/><text x="202" y="87">Liquid</text><rect x="185" y="108" width="9" height="9" rx="2" fill="#f59e0b"/><text x="202" y="117">Pension</text></g>
+                <g font-size="12" fill="#374151" font-weight="800"><rect x="185" y="48" width="9" height="9" rx="2" fill="#d49a16"/><text x="202" y="57">Real estate</text><rect x="185" y="78" width="9" height="9" rx="2" fill="#243c59"/><text x="202" y="87">Liquid</text><rect x="185" y="108" width="9" height="9" rx="2" fill="#93aa9d"/><text x="202" y="117">Pension</text></g>
               </svg>
             </div>
             <div class="card">
@@ -656,6 +661,6 @@ document.getElementById('overlay').addEventListener('keydown',event=>{
 });
 </script>
 <script src="account-data.js?v=63ce6bc83700"></script>
-<script src="accounts.js?v=157f0d231258"></script>
+<script src="accounts.js?v=30cdadf9d46a"></script>
 </body>
 </html>

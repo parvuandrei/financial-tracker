@@ -1,0 +1,63 @@
+/* Cashcaval: a little playfulness, a clear view of your wealth. */
+:root{
+  --bg:#FAF8F2;--card:#fffefa;--text:#132238;--muted:#657080;--line:#e6e2d8;
+  --nav:#132238;--blue:#243c59;--green:#167457;--red:#bd3b3b;--amber:#ad7000;
+  --gold:#F5BC35;--gold-soft:#fff2cc;--shadow:0 8px 28px rgba(19,34,56,.055);
+}
+body{background:var(--bg);color:var(--text)}
+aside{background:var(--nav);color:#cdd4de}
+.brand,.authBrand{letter-spacing:-.045em;font-weight:800;gap:10px}
+.brand{font-size:25px;margin:0 0 28px}
+.logo{background:none;border-radius:0;width:42px;height:42px;flex-shrink:0;display:block}
+.brandTagline{color:#b9c4d2;font-size:12px;line-height:1.6}
+.nav{border-radius:12px;transition:background .15s,color .15s}
+.nav.active{background:var(--gold);color:var(--nav)}
+.nav:hover{background:#263951;color:#fff}
+.nav.active:hover{background:#ffcd55;color:var(--nav)}
+header{background:rgba(250,248,242,.97)}
+.title{letter-spacing:-.04em}
+.card{border-color:var(--line);box-shadow:var(--shadow)}
+.hero{background:var(--nav);color:#fffefa;border-color:var(--nav)}
+.hero .kicker{color:var(--gold)}
+.hero .sub{color:#cdd4de}
+.hero .metric{color:#fffefa}
+#netWorthMetric{color:var(--gold)}
+.hero .cta{margin-top:14px}
+button.cta{background:var(--gold);color:var(--nav);font-weight:800}
+button.cta:hover{background:#ffcc52}
+button.cta.secondary{background:var(--card);color:var(--nav);border:1px solid var(--line)}
+button.cta.secondary:hover{background:var(--gold-soft);border-color:#e5c777}
+.hero button.cta.secondary{background:var(--gold);color:var(--nav);border-color:var(--gold)}
+.textButton{color:#294c72;text-underline-offset:3px}
+.textButton:hover{text-decoration:underline}
+:focus-visible{outline:3px solid #a86d00;outline-offset:3px}
+aside :focus-visible,.hero :focus-visible{outline-color:var(--gold)}
+.tab{background:#f4f1e9;border-color:var(--line);color:#596473}
+.tab.active{background:var(--nav);border-color:var(--nav);color:white}
+.progressTrack{background:#eee9dc}
+.progress{background:var(--gold)}
+.tag,.hero .tag{background:var(--gold-soft);color:#775200}
+.demoBadge{background:var(--gold-soft);border-color:#e4cb8a;color:#775200}
+.demoNotice{background:#f3efdf;color:#625334;border-bottom:1px solid #e8dfc7}
+input,select{background:#fffefa;color:var(--text);border-color:var(--line)}
+input[type=range]{accent-color:#a86d00}
+.controlTop span{color:#294c72}
+.prefItem,.ruleBox{background:#f8f5ec;border-color:var(--line)}
+.choice{background:#f8f5ec;border-color:var(--line);color:var(--nav)}
+.choice.active{background:var(--gold-soft);border-color:#a86d00;color:var(--nav)}
+.stepDot.active{background:#a86d00}
+.wizard{background:var(--card)}
+.wizTop{background:#f8f5ec}
+.wizTop h2{letter-spacing:-.04em}
+.authScreen{background:var(--bg)}
+.authCard{border-top:5px solid var(--gold);box-shadow:0 18px 70px rgba(19,34,56,.10)}
+.authBrand{font-size:32px;margin-bottom:6px}
+.authTagline{margin:0 0 28px;color:var(--muted);font-size:14px}
+.authBrand .logo{width:48px;height:48px}
+.authCard h1{font-size:26px}
+@media(max-width:950px){
+  .app aside .brand{display:flex;margin:0 0 8px;font-size:22px}
+  .app aside .brand .logo{width:32px;height:32px}
+  .app aside{padding-top:12px}
+}
+@media(prefers-reduced-motion:reduce){.nav{transition:none}}
